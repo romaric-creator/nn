@@ -1,0 +1,35 @@
+{
+  "appId": "com.flexystore.shop",
+  "productName": "Flexy Store",
+  "asar": true,
+  "files": ["dist/**/*", "src/main/**/*", "src/preload/**/*"],
+  "directories": {
+    "buildResources": "build",
+    "output": "release"
+  },
+  "extraResources": [
+    {
+      "from": "src/main/db/schema.sql",
+      "to": "schema.sql"
+    }
+  ],
+  "win": {
+    "target": [
+      {
+        "target": "nsis",
+        "arch": ["x64"]
+      }
+    ]
+  },
+  "linux": {
+    "target": "AppImage",
+    "category": "Utility"
+  },
+  "nsis": {
+    "oneClick": false,
+    "allowToChangeInstallationDirectory": true,
+    "createDesktopShortcut": true,
+    "createStartMenuShortcut": true,
+    "shortcutName": "Flexy Store"
+  }
+}
