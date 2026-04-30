@@ -87,6 +87,7 @@ const initDb = (databaseInstance, schemaFilePath) => {
           );
           databaseInstance.serialize(() => {
             databaseInstance.run("PRAGMA foreign_keys=OFF");
+            databaseInstance.run("BEGIN TRANSACTION");
             databaseInstance.get(
               "SELECT name FROM sqlite_master WHERE type='table' AND name='products_new'",
               (getErr, row) => {

@@ -1,5 +1,26 @@
 import { useState, useEffect } from "react";
-import { ShieldAlert, Search, ShieldCheck, Activity, CalendarClock, ArrowUp, ArrowDown, XOctagon, Wrench, PlusCircle, PencilLine, Undo } from "lucide-react";
+import { 
+  ShieldAlert, 
+  Search, 
+  ShieldCheck, 
+  Activity, 
+  CalendarClock, 
+  ArrowUp, 
+  ArrowDown, 
+  XOctagon, 
+  Wrench, 
+  PlusCircle, 
+  PencilLine, 
+  Undo,
+  Fingerprint,
+  RotateCcw,
+  Shield,
+  Eye,
+  Archive,
+  AlertTriangle,
+  ChevronRight,
+  Database
+} from "lucide-react";
 import { useNotify } from "../components/NotificationProvider";
 
 export default function Audits() {
@@ -16,15 +37,15 @@ export default function Audits() {
         try {
             setLoading(true);
             if (window.electronAPI) {
-                const response = await window.electronAPI.invoke<any[]>("audit:getAll", 300);
+                const response: any = await window.electronAPI.invoke("audit:getLogs", 300);
                 if (response.success) {
                     setLogs(response.data || []);
                 } else {
-                    notify("error", "Erreur de chargement", response.message || "Erreur inconnue");
+                    notify("error", "Échec de synchronisation", response.message || "Impossible d'accéder aux journaux");
                 }
             }
         } catch (err: any) {
-            notify("error", "Erreur", err.message);
+            notify("error", "Violation de flux", err.message);
         } finally {
             setLoading(false);
         }
@@ -36,295 +57,235 @@ export default function Audits() {
         const name = log.user_name || "Système";
         const entity = log.entity || "";
         const reason = log.reason || "";
-        // Check all relevant fields for the search term
         return action.toLowerCase().includes(term) ||
             name.toLowerCase().includes(term) ||
             entity.toLowerCase().includes(term) ||
-            reason.toLowerCase().includes(term) ||
-            (log.newValue && typeof log.newValue === 'string' && log.newValue.toLowerCase().includes(term)) ||
-            (log.oldValue && typeof log.oldValue === 'string' && log.oldValue.toLowerCase().includes(term));
+            reason.toLowerCase().includes(term);
     });
 
-    const getLogIcon = (type: string, action: string) => {
-        if (type === "user") {
-            return <Activity size={18} className="text-blue-500" />;
-        }
-        if (type === "price") {
-            return <ShieldAlert size={18} className="text-amber-500" />;
-        }
-        // Stock movements
-        if (action === "STOCK_IN") {
-            return <ArrowUp size={18} className="text-emerald-500" />;
-        }
-        if (action === "STOCK_OUT") {
-            return <ArrowDown size={18} className="text-red-500" />;
-        }
-        // Defective reporting
-        if (action === "REPORT_DEFECTIVE") {
-            return <XOctagon size={18} className="text-red-500" />;
-        }
-        // Repair actions
-        if (action.startsWith("MARK_REPAIRED") || action.startsWith("MARK_UNIT_REPAIRED") || action.startsWith("MARK_QUANTITY_REPAIRED") || action === "STOCK_INCREMENT_REPAIR") {
-            return <Wrench size={18} className="text-indigo-500" />;
-        }
-        // Standard actions
-        if (action === "DELETE" || action === "CANCEL") {
-            return <ShieldAlert size={18} className="text-red-500" />;
-        }
-        if (action === "CREATE") {
-            return <PlusCircle size={18} className="text-emerald-500" />;
-        }
-        if (action === "UPDATE") {
-            return <PencilLine size={18} className="text-indigo-500" />;
-        }
-        if (action === "RESTORE") {
-            return <Undo size={18} className="text-cyan-500" />;
-        }
-        return <ShieldCheck size={18} className="text-emerald-500" />; // Default icon
-    };
-
-    const getLogBadge = (type: string, action: string) => {
-        let bg = "bg-slate-100";
-        let text = "text-slate-600";
-        let label = action || type;
+    const getLogConfig = (type: string, action: string) => {
+        // Default
+        let config = { icon: Shield, color: "slate", label: action || type };
 
         if (type === "user") {
-            bg = "bg-blue-50"; text = "text-blue-600"; label = action;
+            config = { icon: Activity, color: "indigo", label: action };
         } else if (type === "price") {
-            bg = "bg-amber-50"; text = "text-amber-600"; label = "REMISE EXCEPTIONNELLE";
-        } else {
-            // Stock movements
-            if (action === "STOCK_IN") {
-                bg = "bg-emerald-50"; text = "text-emerald-600"; label = "STOCK ENTRANT";
-            } else if (action === "STOCK_OUT") {
-                bg = "bg-red-50"; text = "text-red-600"; label = "STOCK SORTANT";
-            }
-            // Defective reporting
-            else if (action === "REPORT_DEFECTIVE") {
-                bg = "bg-red-100"; text = "text-red-700"; label = "SIGNALÉ DÉFECTUEUX";
-            }
-            // Repair actions
-            else if (action.startsWith("MARK_REPAIRED") || action.startsWith("MARK_UNIT_REPAIRED") || action.startsWith("MARK_QUANTITY_REPAIRED") || action === "STOCK_INCREMENT_REPAIR") {
-                bg = "bg-indigo-50"; text = "text-indigo-600"; label = "RÉPARÉ / RESTAURÉ";
-            }
-            // Standard actions
-            else if (action === "CREATE") { bg = "bg-emerald-50"; text = "text-emerald-600"; }
-            else if (action === "UPDATE") { bg = "bg-indigo-50"; text = "text-indigo-600"; }
-            else if (action === "DELETE" || action === "CANCEL") { bg = "bg-red-50"; text = "text-red-600"; }
-            else if (action === "RESTORE") { bg = "bg-cyan-50"; text = "text-cyan-600"; }
-            else { // Default for generic audit logs if not covered above
-                bg = "bg-slate-100"; text = "text-slate-600"; label = action;
-            }
+            config = { icon: ShieldAlert, color: "amber", label: "REMISE EXCEPTIONNELLE" };
+        } else if (action === "STOCK_IN") {
+            config = { icon: ArrowUp, color: "emerald", label: "ENTRÉE STOCK" };
+        } else if (action === "STOCK_OUT") {
+            config = { icon: ArrowDown, color: "rose", label: "SORTIE STOCK" };
+        } else if (action === "REPORT_DEFECTIVE") {
+            config = { icon: XOctagon, color: "rose", label: "UNITÉ HS" };
+        } else if (action.startsWith("MARK_REPAIRED") || action.startsWith("MARK_UNIT_REPAIRED") || action === "STOCK_INCREMENT_REPAIR") {
+            config = { icon: Wrench, color: "indigo", label: "RÉPARATION" };
+        } else if (action === "UPDATE") {
+            config = { icon: PencilLine, color: "sky", label: "MODIFICATION" };
+        } else if (action === "CREATE") {
+            config = { icon: PlusCircle, color: "emerald", label: "CRÉATION" };
+        } else if (action === "DELETE" || action === "CANCEL") {
+            config = { icon: ShieldAlert, color: "rose", label: "ANNULATION" };
+        } else if (action === "RESTORE") {
+            config = { icon: Undo, color: "sky", label: "RESTAURATION" };
         }
 
-        return (
-            <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold tracking-wider ${bg} ${text}`}>
-                {label}
-            </span>
-        );
+        return config;
     };
-const formatFieldName = (field: string): string => {
-    const translations: Record<string, string> = {
-        brand: "Marque",
-        model: "Modèle",
-        category: "Catégorie",
-        state: "État",
-        purchase_price: "Prix d'achat",
-        sale_price: "Prix de vente",
-        min_sale_price: "Prix de vente minimum",
-        stock: "Stock",
-        min_stock: "Stock minimum",
-        cpu: "Processeur",
-        ram: "Mémoire RAM",
-        gpu: "Carte graphique",
-        storage: "Stockage",
-        entry_date: "Date d'entrée",
-        login: "Identifiant",
-        name: "Nom",
-        hash: "Mot de passe",
-        role: "Rôle",
-        active: "Actif",
-        commission_percent: "Pourcentage de commission",
-        phone: "Téléphone",
-        email: "Email",
-        address: "Adresse",
-        total_amount: "Montant total",
-        date: "Date",
+
+    const formatFieldName = (field: string): string => {
+        const translations: Record<string, string> = {
+            brand: "Marque",
+            model: "Modèle",
+            category: "Catégorie",
+            state: "État",
+            purchase_price: "Prix d'achat",
+            sale_price: "Prix de vente",
+            min_sale_price: "Prix de vente min",
+            stock: "Stock",
+            min_stock: "Seuil stock",
+            phone: "Téléphone",
+            name: "Nom",
+            role: "Rôle",
+            active: "Statut",
+        };
+        return translations[field] || field;
     };
-    return translations[field] || field;
-};
 
-const formatMessage = (log: any) => {
-    // Specific formatting for price audit logs
-    if (log.log_type === "price") {
-        return `Baisse de prix sur produit (Raison: ${log.reason || 'Non spécifiée'}) : ${log.original_price || '—'} CFA → ${log.modified_price || '—'} CFA`;
-    }
-    // Specific formatting for user logs (generic message for now)
-    if (log.log_type === "user") {
-        return "Interaction système ou connexion utilisateur";
-    }
+    const formatMessage = (log: any) => {
+        if (log.log_type === "price") {
+            return `Ajustement tarifaire manuel : ${log.original_price?.toLocaleString()} → ${log.modified_price?.toLocaleString()} CFA (Raison: ${log.reason || 'N/A'})`;
+        }
 
-    let message = "Action enregistrée"; // Default message
+        try {
+            const newValue = log.new_value ? JSON.parse(log.new_value) : null;
+            const oldValue = log.old_value ? JSON.parse(log.old_value) : null;
 
-    try {
-        const newValue = log.new_value ? JSON.parse(log.new_value) : null;
-        const oldValue = log.old_value ? JSON.parse(log.old_value) : null;
-
-        // Handle different actions and entities
-        if (log.action === "STOCK_IN") {
-            message = `✓ Entrée en stock: Produit #${newValue?.productId || log.entity_id} | Quantité: ${newValue?.quantity} | Note: ${newValue?.note || '—'}`;
-        } else if (log.action === "STOCK_OUT") {
-            message = `✗ Sortie de stock: Produit #${newValue?.productId || log.entity_id} | Quantité: ${newValue?.quantity} | Note: ${newValue?.note || '—'}`;
-        } else if (log.action === "REPORT_DEFECTIVE") {
-            message = `⚠ Produit #${newValue?.productId || log.entity_id} signalé défectueux | Quantité: ${newValue?.quantity} | Note: ${newValue?.note || '—'}`;
-        } else if (log.action === "MARK_UNIT_REPAIRED") {
-            message = `🔧 Unité #${newValue?.unitId || log.entity_id} réparée | Produit #${newValue?.productId} | État: ${newValue?.previousStatus} → ${newValue?.newStatus}`;
-        } else if (log.action === "MARK_QUANTITY_REPAIRED") {
-            message = `🔧 Lot de ${newValue?.quantity} unité(s) réparé(es) | Produit #${newValue?.productId} | ${newValue?.unitsDeleted?.length || 0} unité(s) défectueuse(s) supprimée(s)`;
-        } else if (log.action === "STOCK_INCREMENT_REPAIR") {
-            message = `📈 Stock produit #${newValue?.productId || log.entity_id} augmenté de ${newValue?.quantityIncremented} | Raison: ${newValue?.reason || 'Réparation'}`;
-        } else if (log.action === "UPDATE" && log.entity === "products") {
-            if (oldValue && newValue) {
+            if (log.action === "STOCK_IN") return `Réception de ${newValue?.quantity} unités | Note: ${newValue?.note || '—'}`;
+            if (log.action === "STOCK_OUT") return `Sortie forcée de ${newValue?.quantity} unités | Motif: ${newValue?.note || '—'}`;
+            if (log.action === "REPORT_DEFECTIVE") return `Mise au rebut de ${newValue?.quantity} unités défectueuses`;
+            if (log.action === "MARK_UNIT_REPAIRED") return `Unité #${newValue?.unitId} remise en état fonctionnel`;
+            
+            if (log.action === "UPDATE" && oldValue && newValue) {
                 let changes = [];
-                const ignoredFields = ["_user_id"];
                 for (const key in newValue) {
-                    if (newValue.hasOwnProperty(key) && !ignoredFields.includes(key) && oldValue.hasOwnProperty(key) && newValue[key] !== oldValue[key]) {
-                        changes.push(`${formatFieldName(key)}: ${oldValue[key]} → ${newValue[key]}`);
+                    if (newValue[key] !== oldValue[key]) {
+                        changes.push(`${formatFieldName(key)}: ${oldValue[key]} ➔ ${newValue[key]}`);
                     }
                 }
-                for (const key in oldValue) {
-                    if (oldValue.hasOwnProperty(key) && !ignoredFields.includes(key) && !newValue.hasOwnProperty(key)) {
-                        changes.push(`${formatFieldName(key)}: ${oldValue[key]} → SUPPRIMÉ`);
-                    }
-                }
-                message = changes.length > 0
-                    ? `Produit #${log.entity_id} modifié | ${changes.join(" | ")}`
-                    : `Produit #${log.entity_id} modifié (aucun changement détecté)`;
-            } else if (newValue && !oldValue) {
-                message = `Produit #${log.entity_id} mis à jour avec de nouvelles informations`;
-            } else {
-                message = `Produit #${log.entity_id} modifié`;
+                return changes.length > 0 ? changes.join(" | ") : "Mise à jour des métadonnées";
             }
-        } else if (log.entity === "products" && log.action === "CREATE") {
-            if (newValue && newValue.model) message = `✨ Nouveau produit: ${newValue.brand} ${newValue.model} (ID: #${log.entity_id})`;
-            else if (newValue && newValue.brand) message = `✨ Nouveau produit: ${newValue.brand} (ID: #${log.entity_id})`;
-            else message = `✨ Nouveau produit créé (ID: #${log.entity_id})`;
-        } else if (log.entity === "purchases" && log.action === "CREATE") {
-            message = `📦 Nouvel achat créé (ID: #${log.entity_id})`;
-        } else if (log.entity === "customers" && log.action === "CREATE") {
-            if (newValue && newValue.name) message = `👤 Nouveau client: ${newValue.name}`;
-            else message = `👤 Nouveau client créé (ID: #${log.entity_id})`;
-        } else if (log.entity === "customers" && log.action === "UPDATE") {
-            if (newValue && newValue.name) message = `👤 Client modifié: ${newValue.name}`;
-            else message = `👤 Client #${log.entity_id} modifié`;
-        } else if (log.entity === "customers" && log.action === "DELETE") {
-            message = `👤 Client #${log.entity_id} supprimé`;
-        } else if (log.entity === "users" && log.action === "CREATE") {
-            if (newValue && newValue.name) message = `👥 Nouvel utilisateur: ${newValue.name} (Rôle: ${newValue.role || 'vendeur'})`;
-            else message = `👥 Nouvel utilisateur créé (ID: #${log.entity_id})`;
-        } else if (log.entity === "users" && log.action === "DEACTIVATE") {
-            message = `🚫 Compte utilisateur #${log.entity_id} désactivé`;
-        } else if (log.action === "DELETE" && log.entity === "products") {
-            message = `🗑 Produit #${log.entity_id} marqué comme supprimé`;
-        } else if (log.action === "RESTORE" && log.entity === "products") {
-            message = `↩ Produit #${log.entity_id} restauré`;
-        } else if (log.action === "CANCEL" && log.entity === "sales") {
-            message = `❌ Vente #${log.entity_id} annulée`;
+
+            if (log.action === "CREATE") return `Enregistrement initial : ${newValue?.name || newValue?.model || 'Entité ID ' + log.entity_id}`;
+            if (log.action === "CANCEL") return `Révocation de la transaction #${log.entity_id}`;
+            
+            return log.new_value ? (typeof log.new_value === 'string' ? log.new_value.substring(0, 80) : "Action système") : "Événement d'audit";
+        } catch {
+            return "Traitement de l'événement système";
         }
-        // Add more specific formatting for other entities/actions as needed
-    } catch (e) {
-        // Fallback for unparseable JSON or if new_value is not JSON
-        console.error("Failed to parse log new_value or apply specific formatting:", e);
-        if (log.new_value && typeof log.new_value === 'string') {
-            message = log.new_value.length > 100 ? log.new_value.substring(0, 100) + "..." : log.new_value;
-        } else if (log.action) {
-            message = `Action: ${log.action}`;
-        }
-    }
-    return message;
-};
+    };
 
     return (
-        <div className="space-y-6">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="animate-in fade-in duration-700 space-y-10 pb-20">
+            {/* Header Section */}
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
                 <div>
-                    <h1 className="text-2xl font-bold text-ink-900 tracking-tight">Journal d'Audit</h1>
-                    <p className="text-sm text-ink-500 mt-1">
-                        Traçabilité complète des actions critiques et de la sécurité du système.
-                    </p>
+                   <div className="flex items-center gap-3 mb-4">
+                      <div className="p-2.5 bg-slate-900 rounded-xl shadow-2xl shadow-indigo-500/20 rotate-3 border border-slate-800">
+                         <Shield className="text-indigo-400" size={24} />
+                      </div>
+                      <h1 className="text-3xl font-black text-slate-900 tracking-tight italic">Audit de Sécurité</h1>
+                   </div>
+                   <p className="text-slate-500 font-medium ml-1">Surveillance cryptographique des événements système</p>
+                </div>
+
+                <div className="flex items-center gap-4">
+                   <div className="glass-card px-6 py-3 rounded-2xl flex items-center gap-3 border-indigo-100/50">
+                      <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-600">Système Intègre</span>
+                   </div>
+                   <button 
+                     onClick={fetchLogs}
+                     className="p-3 bg-white border border-slate-200 rounded-xl text-slate-500 hover:text-indigo-600 transition-all shadow-sm group"
+                   >
+                      <RotateCcw size={20} className="group-active:rotate-180 transition-transform duration-500" />
+                   </button>
                 </div>
             </div>
 
-            <div className="card">
-                <div className="p-4 border-b border-surface-200">
-                    <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-400" size={18} />
-                        <input
-                            type="text"
-                            placeholder="Rechercher par utilisateur, action ou raison..."
-                            className="input-field pl-10"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                    </div>
-                </div>
+            {/* Filter Hub */}
+            <div className="glass-card p-6 rounded-[2.5rem] border-slate-200/60 shadow-xl shadow-slate-200/40">
+               <div className="relative group">
+                  <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-indigo-500 transition-colors" size={20} />
+                  <input 
+                    type="text" 
+                    placeholder="Filtrer par identifiant, action ou entité spécifique..."
+                    className="w-full bg-slate-50 border border-slate-200 rounded-2xl pl-16 pr-6 py-4 text-sm font-bold placeholder:text-slate-300 outline-none focus:bg-white focus:border-indigo-400 transition-all focus:ring-4 focus:ring-indigo-500/5 shadow-inner"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+               </div>
+            </div>
 
-                <div className="overflow-x-auto">
-                    {loading ? (
-                        <div className="flex justify-center items-center h-48">
-                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-600"></div>
+            {/* Audit Logs Table */}
+            <div className="bg-white rounded-[3.5rem] border border-slate-100 shadow-2xl shadow-slate-200/50 overflow-hidden">
+               {loading ? (
+                  <div className="p-40 flex flex-col items-center justify-center animate-pulse">
+                     <Fingerprint size={64} className="text-indigo-100 mb-6" />
+                     <p className="text-slate-400 font-black uppercase tracking-[0.2em] text-xs">Authentification des flux...</p>
+                  </div>
+               ) : (
+                  <div className="overflow-x-auto custom-scrollbar">
+                     <table className="w-full text-left border-collapse">
+                        <thead>
+                           <tr className="bg-slate-900 text-white">
+                              <th className="py-7 px-10 text-[9px] font-black uppercase tracking-[0.25em]">Estampille</th>
+                              <th className="py-7 px-6 text-[9px] font-black uppercase tracking-[0.25em]">Opérateur</th>
+                              <th className="py-7 px-6 text-[9px] font-black uppercase tracking-[0.25em]">Signalement</th>
+                              <th className="py-7 px-6 text-[9px] font-black uppercase tracking-[0.25em]">Entité</th>
+                              <th className="py-7 px-10 text-[9px] font-black uppercase tracking-[0.25em]">Transcription de l'événement</th>
+                           </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                           {filteredLogs.map((log, index) => {
+                              const config = getLogConfig(log.log_type, log.action);
+                              return (
+                                 <tr key={index} className="group hover:bg-slate-50/80 transition-all">
+                                    <td className="py-6 px-10">
+                                       <div className="flex items-center gap-3">
+                                          <div className="p-2 bg-slate-900 border border-slate-800 rounded-xl">
+                                             <CalendarClock size={16} className="text-slate-500" />
+                                          </div>
+                                          <div className="min-w-0">
+                                             <p className="text-[10px] font-black text-slate-900 leading-none mb-1">
+                                                {new Date(log.timestamp).toLocaleDateString("fr-FR")}
+                                             </p>
+                                             <p className="text-[10px] font-bold text-slate-400 font-mono italic">
+                                                {new Date(log.timestamp).toLocaleTimeString("fr-FR")}
+                                             </p>
+                                          </div>
+                                       </div>
+                                    </td>
+                                    <td className="py-6 px-6">
+                                       <div className="flex items-center gap-3">
+                                          <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center font-black text-[10px] text-slate-400 group-hover:bg-indigo-600 group-hover:text-white transition-all shadow-sm">
+                                             {(log.user_name || "S").charAt(0).toUpperCase()}
+                                          </div>
+                                          <span className="font-extrabold text-slate-700 text-xs uppercase tracking-tight">{log.user_name || "Système"}</span>
+                                       </div>
+                                    </td>
+                                    <td className="py-6 px-6">
+                                       <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border border-${config.color}-100 bg-${config.color}-50 text-${config.color}-600`}>
+                                          <config.icon size={14} strokeWidth={3} />
+                                          <span className="text-[9px] font-black uppercase tracking-widest">{config.label}</span>
+                                       </div>
+                                    </td>
+                                    <td className="py-6 px-6">
+                                       <div className="flex items-center gap-1 text-slate-400 font-bold text-[10px] uppercase tracking-wider">
+                                          <Database size={10} />
+                                          <span>{log.entity || log.log_type}</span>
+                                       </div>
+                                    </td>
+                                    <td className="py-6 px-10">
+                                       <div className="flex items-center justify-between gap-4">
+                                          <p className="text-xs font-bold text-slate-600 leading-relaxed italic truncate max-w-md" title={formatMessage(log)}>
+                                             {formatMessage(log)}
+                                          </p>
+                                          <button className="p-2 text-slate-200 hover:text-indigo-400 transition-colors">
+                                             <Eye size={16} />
+                                          </button>
+                                       </div>
+                                    </td>
+                                 </tr>
+                              );
+                           })}
+                        </tbody>
+                     </table>
+                     
+                     {filteredLogs.length === 0 && (
+                        <div className="py-32 flex flex-col items-center justify-center text-center">
+                           <div className="p-8 bg-slate-50 rounded-full mb-6">
+                              <ShieldAlert size={48} className="text-slate-200" />
+                           </div>
+                           <h4 className="text-slate-900 font-black text-lg mb-1 tracking-tight italic">Journal Vierge</h4>
+                           <p className="text-slate-400 font-medium text-xs tracking-widest uppercase">Aucun événement ne correspond aux paramètres</p>
                         </div>
-                    ) : filteredLogs.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center h-48 text-ink-400">
-                            <ShieldCheck size={40} className="mb-2 opacity-50" />
-                            <p>Aucun journal d'audit trouvé.</p>
-                        </div>
-                    ) : (
-                        <table className="w-full text-left border-collapse">
-                            <thead>
-                                <tr className="bg-surface-50/50 border-b border-surface-200 text-xs font-semibold text-ink-500 uppercase tracking-wider">
-                                    <th className="py-3 px-4 w-12 text-center"></th>
-                                    <th className="py-3 px-4">Date & Heure</th>
-                                    <th className="py-3 px-4">Utilisateur</th>
-                                    <th className="py-3 px-4">Type / Entité</th>
-                                    <th className="py-3 px-4">Action</th>
-                                    <th className="py-3 px-4">Détails de l'événement</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-surface-200">
-                                {filteredLogs.map((log, index) => (
-                                    <tr key={index} className="hover:bg-surface-50/30 transition-colors">
-                                        <td className="py-3 px-4 text-center">
-                                            <div className="flex justify-center">
-                                                {getLogIcon(log.log_type, log.action)}
-                                            </div>
-                                        </td>
-                                        <td className="py-3 px-4">
-                                            <div className="flex items-center gap-2 text-sm text-ink-700 whitespace-nowrap">
-                                                <CalendarClock size={14} className="text-ink-400" />
-                                                {new Date(log.timestamp).toLocaleString("fr-FR")}
-                                            </div>
-                                        </td>
-                                        <td className="py-3 px-4">
-                                            <span className="font-medium text-ink-900 text-sm">{log.user_name || "Système ou Inconnu"}</span>
-                                        </td>
-                                        <td className="py-3 px-4">
-                                            <span className="text-sm font-medium text-ink-600 capitalize">
-                                                {log.entity || log.log_type}
-                                            </span>
-                                        </td>
-                                        <td className="py-3 px-4">
-                                            {getLogBadge(log.log_type, log.action)}
-                                        </td>
-                                        <td className="py-3 px-4 text-sm text-ink-600 whitespace-normal" title={formatMessage(log)}>
-                                            {formatMessage(log)}
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    )}
-                </div>
+                     )}
+                  </div>
+               )}
+
+               {/* Table Footer */}
+               <div className="p-6 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                     <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{filteredLogs.length} Entrées affichées</span>
+                     <div className="h-4 w-px bg-slate-200"></div>
+                     <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Temps réel actif</span>
+                  </div>
+                  
+                  <div className="flex items-center gap-2">
+                     <button className="p-2.5 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-slate-900 transition-all opacity-50"><ChevronRight size={16} className="rotate-180" /></button>
+                     <button className="p-2.5 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-slate-900 transition-all"><ChevronRight size={16} /></button>
+                  </div>
+               </div>
             </div>
         </div>
     );

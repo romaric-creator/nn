@@ -12,6 +12,10 @@ import {
   TrendingUp,
   History,
   Activity,
+  ArrowUpRight,
+  Search,
+  Bell,
+  Calendar,
 } from "lucide-react";
 
 function isValidNumber(val: any) {
@@ -23,44 +27,54 @@ function StatCard({
   value,
   loading,
   icon: Icon,
-  color,
+  trend,
+  color = "indigo",
 }: {
   title: string;
   value: string | number;
   loading: boolean;
   icon: any;
-  color: string;
+  trend?: string;
+  color?: string;
 }) {
+  const colorMap: any = {
+    indigo: "from-indigo-600 to-blue-500 shadow-indigo-100 text-indigo-600 bg-indigo-50",
+    emerald: "from-emerald-600 to-teal-500 shadow-emerald-100 text-emerald-600 bg-emerald-50",
+    rose: "from-rose-600 to-pink-500 shadow-rose-100 text-rose-600 bg-rose-50",
+    amber: "from-amber-600 to-orange-500 shadow-amber-100 text-amber-600 bg-amber-50",
+  };
+
+  const style = colorMap[color] || colorMap.indigo;
+
   return (
-    <div className="bg-white border-[4px] border-[#1A1A1A] p-8 shadow-[12px_12px_0px_#1A1A1A] group transition-all hover:translate-x-[-4px] hover:translate-y-[-4px] hover:shadow-[16px_16px_0px_#1A1A1A] relative overflow-hidden">
-      {/* Accent de couleur discret en coin */}
-      <div
-        className={`absolute top-0 right-0 w-16 h-16 ${color} opacity-10 -rotate-45 translate-x-8 -translate-y-8`}
-      ></div>
-
-      <div className="flex items-center justify-between mb-8 relative z-10">
-        <div
-          className={`p-4 border-4 border-[#1A1A1A] ${color} shadow-[4px_4px_0px_#1A1A1A]`}
-        >
-          <Icon size={28} className="text-[#1A1A1A]" />
-        </div>
-        <div className="flex items-center gap-2 bg-[#1A1A1A] text-white px-3 py-1 text-[10px] font-black uppercase tracking-widest shadow-[4px_4px_0px_#FF5F1F]">
-          <TrendingUp size={12} className="text-[#FF5F1F]" />
-          <span>Actif</span>
-        </div>
-      </div>
-
+    <div className="bg-white rounded-[2rem] p-8 border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-500 group relative overflow-hidden">
+      <div className="absolute -right-4 -top-4 w-24 h-24 bg-slate-50 rounded-full opacity-50 group-hover:scale-150 transition-transform duration-700"></div>
+      
       <div className="relative z-10">
-        <span className="text-[11px] font-black uppercase tracking-[0.3em] text-[#1A1A1A] opacity-60 block mb-2">
-          {title}
-        </span>
-        {loading ? (
-          <div className="h-12 w-40 bg-[#1A1A1A]/5 animate-pulse"></div>
-        ) : (
-          <div className="text-4xl font-black text-[#1A1A1A] tracking-tighter">
-            {value}
+        <div className="flex items-start justify-between mb-6">
+          <div className={`p-4 rounded-2xl ${style.split(' ').slice(4).join(' ')} group-hover:scale-110 transition-transform duration-500`}>
+            <Icon size={28} />
           </div>
-        )}
+          {trend && (
+            <div className="flex items-center gap-1.5 text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-xl text-[11px] font-black tracking-tight">
+              <TrendingUp size={14} />
+              <span>{trend}</span>
+            </div>
+          )}
+        </div>
+        
+        <div>
+          <p className="text-xs font-bold text-slate-400 uppercase tracking-[0.2em] mb-2 px-1">
+            {title}
+          </p>
+          {loading ? (
+            <div className="h-10 w-3/4 bg-slate-100 animate-pulse rounded-xl"></div>
+          ) : (
+            <h3 className="text-3xl font-black text-slate-900 tracking-tighter">
+              {value}
+            </h3>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -76,8 +90,8 @@ export default function Home() {
   const [weeklyData, setWeeklyData] = useState<any[]>([]);
   const [auditLogs, setAuditLogs] = useState<any[]>([]);
 
-  const isAdmin =
-    JSON.parse(localStorage.getItem("user") || "{}").role === "admin";
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const isAdmin = user.role === "admin";
 
   useEffect(() => {
     const fetchData = async () => {
@@ -125,309 +139,277 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="space-y-16 max-w-7xl mx-auto pb-32 pt-8">
-      {/* Header Style Registre */}
-      <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8 border-b-8 border-[#1A1A1A] pb-12 relative">
-        <div className="absolute -top-4 -left-4 w-12 h-12 bg-[#FF5F1F] -z-10 opacity-20"></div>
-        <div>
-          <div className="flex items-center gap-4 mb-4">
-            <div className="p-4 bg-[#1A1A1A] text-white shadow-[8px_8px_0px_#FF5F1F]">
-              <LayoutDashboard size={32} />
-            </div>
-            <h1 className="text-6xl font-black tracking-tighter text-[#1A1A1A] uppercase">
-              Tableau de bord
-            </h1>
+    <div className="space-y-10 pb-20 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      {/* Top Navigation / Search area */}
+      <div className="flex items-center justify-between gap-6">
+        <div className="relative flex-1 max-w-md group">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors" size={18} />
+          <input 
+            type="text" 
+            placeholder="Rechercher un produit, une facture..." 
+            className="w-full pl-12 pr-4 py-3.5 bg-white border-none rounded-2xl shadow-sm focus:ring-4 focus:ring-indigo-500/10 text-sm font-medium placeholder:text-slate-400 transition-all"
+          />
+        </div>
+        <div className="flex items-center gap-3">
+          <button className="p-3.5 bg-white rounded-2xl shadow-sm hover:bg-slate-50 transition-colors relative">
+            <Bell size={20} className="text-slate-600" />
+            <span className="absolute top-3 right-3 w-2.5 h-2.5 bg-rose-500 border-2 border-white rounded-full"></span>
+          </button>
+          <div className="hidden md:flex items-center gap-3 bg-white px-5 py-3 rounded-2xl shadow-sm border border-slate-100">
+            <Calendar size={18} className="text-indigo-600" />
+            <span className="text-sm font-bold text-slate-700">
+              {new Date().toLocaleDateString("fr-FR", {
+                day: "2-digit",
+                month: "long",
+                year: "numeric",
+              })}
+            </span>
           </div>
-          <p className="text-3xl font-serif italic font-black text-[#1A1A1A] opacity-80 leading-tight">
-            Bienvenue sur votre registre numérique de gestion.
+        </div>
+      </div>
+
+      {/* Hero Welcome Section */}
+      <section className="relative overflow-hidden rounded-[2.5rem] bg-slate-900 p-10 md:p-14 text-white shadow-2xl">
+        <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-indigo-500/20 to-transparent pointer-events-none"></div>
+        <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-indigo-600/30 blur-[100px] rounded-full"></div>
+        
+        <div className="relative z-10 max-w-2xl">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/10 mb-6">
+            <Activity size={14} className="text-indigo-400" />
+            <span className="text-[10px] font-black uppercase tracking-widest">Système Opérationnel</span>
+          </div>
+          <h1 className="text-4xl md:text-5xl font-black tracking-tighter mb-4">
+            Bonjour, <span className="text-indigo-400">{user.name?.split(' ')[0] || "Admin"}</span> 👋
+          </h1>
+          <p className="text-slate-400 text-lg font-medium leading-relaxed mb-10 max-w-lg">
+            Bienvenue sur votre espace de gestion. Suivez vos performances en temps réel et gérez votre stock en toute simplicité.
           </p>
-        </div>
-        <div className="text-right bg-white border-4 border-[#1A1A1A] p-6 shadow-[8px_8px_0px_#1A1A1A]">
-          <div className="text-[11px] font-black uppercase text-[#1A1A1A] tracking-[0.3em] mb-2 opacity-50">
-            État du Registre
+          
+          <div className="flex flex-wrap gap-4">
+            <button
+              onClick={() => navigate("/sales")}
+              className="premium-btn-primary py-4 px-8 rounded-2xl group shadow-indigo-900/40"
+            >
+              <PlusCircle size={20} />
+              <span>Nouvelle Transaction</span>
+              <ArrowRight size={18} className="ml-2 group-hover:translate-x-1 transition-transform" />
+            </button>
+            <button
+              onClick={() => navigate("/stock")}
+              className="premium-btn bg-white/10 backdrop-blur-md border border-white/10 hover:bg-white/20 text-white py-4 px-8 rounded-2xl transition-all"
+            >
+              <Box size={20} />
+              <span>Consulter l'Inventaire</span>
+            </button>
           </div>
-          <div className="text-2xl font-black text-[#1A1A1A] uppercase tracking-tighter">
-            {new Date().toLocaleDateString("fr-FR", {
-              day: "2-digit",
-              month: "long",
-              year: "numeric",
-            })}
-          </div>
         </div>
-      </header>
+        
+        {/* Animated Visual Component */}
+        <div className="absolute right-14 bottom-14 hidden lg:block animate-float">
+           <div className="w-56 h-56 rounded-[3rem] border border-white/10 bg-white/5 backdrop-blur-xl p-8 flex flex-col justify-between">
+              <div className="flex justify-between items-start">
+                  <div className="w-12 h-12 rounded-2xl bg-indigo-500/20 flex items-center justify-center">
+                    <TrendingUp className="text-indigo-400" size={24} />
+                  </div>
+                  <span className="text-[10px] font-black text-emerald-400 bg-emerald-400/10 px-2 py-1 rounded-lg">+14.2%</span>
+              </div>
+              <div>
+                 <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-1">Croissance</p>
+                 <h4 className="text-2xl font-black">Performance</h4>
+              </div>
+           </div>
+        </div>
+      </section>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         <StatCard
-          title="Produits en Inventaire"
+          title="Stock Total"
           value={productCount}
           loading={loading}
           icon={Package}
-          color="bg-white"
+          trend="+12%"
+          color="indigo"
         />
         <StatCard
           title="Base Clients"
           value={customerCount}
           loading={loading}
           icon={Users}
-          color="bg-[#FF5F1F]"
+          trend="+5%"
+          color="emerald"
         />
         <StatCard
-          title="Chiffre d'Affaires"
+          title="Recettes (Mois)"
           value={`${monthlySalesTotal.toLocaleString()} CFA`}
           loading={loading}
           icon={Banknote}
-          color="bg-white"
+          trend="+8.4%"
+          color="rose"
         />
       </div>
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
-        {/* Actions Rapides - Colonne Gauche */}
-        <div className="lg:col-span-7 space-y-10">
-          <div className="flex items-center gap-4">
-            <div className="h-1.5 flex-1 bg-[#1A1A1A]"></div>
-            <h2 className="text-xl font-black uppercase tracking-[0.4em] text-[#1A1A1A] shrink-0">
-              Opérations
-            </h2>
-            <div className="h-1.5 w-12 bg-[#FF5F1F]"></div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+        {/* Main Content Area */}
+        <div className="lg:col-span-8 space-y-10">
+          {/* Weekly Performance Graph */}
+          <div className="bg-white rounded-[2.5rem] p-10 border border-slate-100 shadow-sm relative overflow-hidden group">
+            <div className="flex items-center justify-between mb-12">
+              <div>
+                <div className="flex items-center gap-3 mb-2">
+                   <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                      <Activity size={20} />
+                   </div>
+                   <h3 className="font-extrabold text-xl text-slate-900 tracking-tight">
+                     Activité des Ventes
+                   </h3>
+                </div>
+                <p className="text-[11px] text-slate-400 font-bold uppercase tracking-[0.25em]">Volume transactionnel (7 derniers jours)</p>
+              </div>
+              <select className="bg-slate-50 border-none rounded-xl text-xs font-bold text-slate-600 px-4 py-2 outline-none focus:ring-2 focus:ring-indigo-500/20">
+                 <option>Cette Semaine</option>
+                 <option>Mois Dernier</option>
+              </select>
+            </div>
+
+            <div className="relative h-72 flex items-end gap-5 border-b border-slate-100 pb-4">
+              {weeklyData.length > 0 ? (
+                weeklyData.map((day, idx) => {
+                  const maxVal = Math.max(...weeklyData.map((d) => d.daily_total)) || 1;
+                  const height = (day.daily_total / maxVal) * 100;
+                  return (
+                    <div key={idx} className="flex-1 flex flex-col items-center group/bar h-full justify-end">
+                      <div
+                        style={{ height: `${Math.max(height, 8)}%` }}
+                        className="w-full bg-indigo-100 rounded-2xl group-hover/bar:bg-indigo-600 transition-all duration-500 relative flex items-start justify-center pt-2"
+                      >
+                        <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[11px] font-bold py-2 px-3 rounded-xl opacity-0 group-hover/bar:opacity-100 group-hover/bar:-translate-y-1 transition-all whitespace-nowrap shadow-xl z-20 pointer-events-none">
+                          {Number(day.daily_total).toLocaleString()} CFA
+                        </div>
+                        <div className="w-1 h-3/4 bg-white/20 rounded-full"></div>
+                      </div>
+                      <span className="text-[10px] font-black text-slate-400 mt-5 uppercase tracking-tighter">
+                        {day.sale_day.split("-")[2]}
+                      </span>
+                    </div>
+                  );
+                })
+              ) : (
+                <div className="w-full h-full flex flex-col items-center justify-center text-slate-300 text-sm gap-4">
+                  <Activity size={40} className="opacity-10" />
+                  <p className="font-bold uppercase tracking-widest opacity-30">Initialisation des données...</p>
+                </div>
+              )}
+            </div>
+            
+            {/* Legend */}
+            <div className="flex items-center gap-6 mt-8">
+               <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-indigo-600"></div>
+                  <span className="text-[10px] font-black text-slate-500 uppercase">Volume Ventes</span>
+               </div>
+               <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-indigo-100"></div>
+                  <span className="text-[10px] font-black text-slate-500 uppercase">Projection</span>
+               </div>
+            </div>
           </div>
+        </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-            <button
-              onClick={() => navigate("/sales")}
-              className="group p-10 bg-[#1A1A1A] text-white border-4 border-[#1A1A1A] shadow-[12px_12px_0px_#FF5F1F] hover:translate-x-[4px] hover:translate-y-[4px] hover:shadow-none transition-all text-left relative overflow-hidden"
-            >
-              <div className="p-4 bg-white text-[#1A1A1A] w-fit mb-8 group-hover:bg-[#FF5F1F] transition-colors">
-                <PlusCircle size={32} />
+        {/* Sidebar Style Right Column */}
+        <div className="lg:col-span-4 space-y-10">
+          {/* Critical Stock Alerts */}
+          <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden group">
+            <div className="p-8 bg-rose-50/50 border-b border-rose-50 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <AlertCircle size={24} className="text-rose-600" />
+                <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest">Alertes Stocks</h3>
               </div>
-              <div className="font-black text-2xl uppercase tracking-tighter mb-2">
-                Nouvelle Vente
-              </div>
-              <div className="text-[10px] font-black uppercase tracking-[0.2em] opacity-60">
-                Sortie de stock immédiate
-              </div>
-              <ArrowRight
-                className="absolute top-10 right-10 text-white/20 group-hover:text-white group-hover:translate-x-2 transition-all"
-                size={32}
-              />
-            </button>
-
-            <button
-              onClick={() => navigate("/stock")}
-              className="group p-10 bg-white text-[#1A1A1A] border-4 border-[#1A1A1A] shadow-[12px_12px_0px_#1A1A1A] hover:translate-x-[4px] hover:translate-y-[4px] hover:shadow-none transition-all text-left relative overflow-hidden"
-            >
-              <div className="p-4 bg-[#1A1A1A] text-white w-fit mb-8 group-hover:bg-[#FF5F1F] transition-colors">
-                <Box size={32} />
-              </div>
-              <div className="font-black text-2xl uppercase tracking-tighter mb-2">
-                Inventaire
-              </div>
-              <div className="text-[10px] font-black uppercase tracking-[0.2em] opacity-60">
-                Contrôle des entrées
-              </div>
-              <ArrowRight
-                className="absolute top-10 right-10 text-[#1A1A1A]/10 group-hover:text-[#1A1A1A] group-hover:translate-x-2 transition-all"
-                size={32}
-              />
-            </button>
-          </div>
-
-          {/* Historique Rapide - Admin Only */}
-          {isAdmin && (
-            <div className="bg-white border-4 border-[#1A1A1A] p-8 shadow-[12px_12px_0px_#1A1A1A]">
-              <h3 className="text-sm font-black uppercase tracking-[0.3em] mb-8 flex items-center gap-3">
-                <History size={18} /> Journal d'Audit Système
-              </h3>
-              <div className="space-y-6 max-h-60 overflow-y-auto custom-scrollbar pr-2">
-                {auditLogs.length === 0 ? (
-                  <div className="flex items-center justify-between text-xs py-2 border-b-2 border-[#1A1A1A]/5 italic">
-                    <span className="font-serif font-black">
-                      -- Aucun mouvement récent enregistré --
-                    </span>
-                    <span className="opacity-40">00:00</span>
+              <span className="bg-rose-600 text-white px-2.5 py-1 rounded-lg text-[10px] font-black">
+                {lowStockProducts.length}
+              </span>
+            </div>
+            <div className="divide-y divide-slate-50 max-h-[400px] overflow-y-auto custom-scrollbar">
+              {lowStockProducts.length === 0 ? (
+                <div className="p-16 text-center text-slate-300">
+                  <Package size={48} className="mx-auto mb-4 opacity-10" />
+                  <p className="text-[10px] font-black uppercase tracking-[0.3em]">Inventaire en règle</p>
+                </div>
+              ) : (
+                lowStockProducts.map((product) => (
+                  <div key={product.id} className="p-6 flex items-center justify-between hover:bg-slate-50 transition-all duration-300">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 group-hover:bg-white transition-colors">
+                        <Box size={20} />
+                      </div>
+                      <div>
+                        <p className="text-sm font-black text-slate-900 group-hover:text-indigo-600 transition-colors uppercase tracking-tighter leading-tight">
+                          {product.model}
+                        </p>
+                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">
+                          {product.brand}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-lg font-black text-rose-600 leading-none">{product.stock}</p>
+                      <p className="text-[9px] text-slate-400 font-black uppercase mt-1">Unités</p>
+                    </div>
                   </div>
+                ))
+              )}
+            </div>
+            <div className="p-6 bg-slate-50">
+               <button 
+                onClick={() => navigate("/stock")}
+                className="w-full py-4 bg-white border border-slate-200 rounded-2xl text-xs font-black uppercase tracking-widest text-slate-600 hover:text-indigo-600 hover:border-indigo-100 transition-all shadow-sm"
+              >
+                 Gérer le Réapprovisionnement
+               </button>
+            </div>
+          </div>
+
+          {/* Recent Audit Logs */}
+          {isAdmin && (
+            <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden">
+              <div className="p-8 border-b border-slate-100 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <History size={24} className="text-indigo-600" />
+                  <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest">Activités</h3>
+                </div>
+                <button 
+                  onClick={() => navigate("/audits")} 
+                  className="text-[10px] font-black text-indigo-600 hover:text-indigo-700 uppercase tracking-widest transition-colors"
+                >
+                  Historique
+                </button>
+              </div>
+              <div className="p-8 space-y-6">
+                {auditLogs.length === 0 ? (
+                  <p className="text-[10px] font-bold text-slate-300 uppercase tracking-[0.2em] text-center py-4 italic">Aucun mouvement détecté</p>
                 ) : (
                   auditLogs.map((log) => (
-                    <div
-                      key={log.id}
-                      className="flex items-center justify-between text-[10px] py-3 border-b-2 border-[#1A1A1A]/5 group hover:bg-[#FDFCF0] transition-colors"
-                    >
-                      <div className="flex flex-col">
-                        <span className="font-black uppercase text-[#FF5F1F]">
-                          {log.action}
-                        </span>
-                        <span className="font-serif italic text-[#1A1A1A]/60">
-                          {log.entity} #{log.entity_id} par {log.user_name}
-                        </span>
+                    <div key={log.id} className="flex gap-4 group">
+                      <div className="relative pt-1">
+                        <div className="w-2.5 h-2.5 rounded-full bg-indigo-500 ring-4 ring-indigo-50 group-hover:scale-125 transition-transform"></div>
+                        <div className="absolute top-6 left-1.25 w-[1px] h-full bg-slate-100 last:hidden"></div>
                       </div>
-                      <span className="font-mono opacity-40 group-hover:opacity-100">
-                        {log.timestamp?.slice(11, 16)}
-                      </span>
+                      <div className="pb-2">
+                        <p className="text-slate-900 text-xs font-black uppercase leading-tight group-hover:text-indigo-600 transition-colors">
+                          {log.action}
+                        </p>
+                        <div className="flex items-center gap-2 mt-1.5 font-bold uppercase tracking-widest text-[9px]">
+                           <span className="text-slate-500">{log.user_name}</span>
+                           <span className="text-slate-300">•</span>
+                           <span className="text-slate-400">{log.timestamp?.slice(11, 16)}</span>
+                        </div>
+                      </div>
                     </div>
                   ))
                 )}
               </div>
             </div>
           )}
-        </div>
-
-        {/* Alertes - Colonne Droite */}
-        <div className="lg:col-span-5 space-y-10">
-          <div className="flex items-center gap-4">
-            <div className="h-1.5 w-12 bg-[#FF5F1F]"></div>
-            <h2 className="text-xl font-black uppercase tracking-[0.4em] text-[#1A1A1A] shrink-0 text-red-600">
-              Alertes
-            </h2>
-            <div className="h-1.5 flex-1 bg-[#1A1A1A]"></div>
-          </div>
-
-          <div className="bg-white border-4 border-[#1A1A1A] shadow-[16px_16px_0px_#1A1A1A] overflow-hidden">
-            <div className="bg-red-600 p-6 border-b-4 border-[#1A1A1A] flex items-center gap-4">
-              <AlertCircle size={28} className="text-white" />
-              <span className="text-white font-black uppercase tracking-[0.2em] text-xs">
-                Ruptures & Stocks Critiques
-              </span>
-            </div>
-            <div className="divide-y-4 divide-[#1A1A1A]/10">
-              {lowStockProducts.length === 0 ? (
-                <div className="p-20 text-center space-y-4 opacity-30">
-                  <Package size={64} className="mx-auto" strokeWidth={1} />
-                  <p className="text-[11px] font-black uppercase tracking-[0.3em]">
-                    Tout est conforme
-                  </p>
-                </div>
-              ) : (
-                lowStockProducts.map((product) => (
-                  <div
-                    key={product.id}
-                    className="flex items-center justify-between p-8 hover:bg-[#FDFCF0] transition-colors group"
-                  >
-                    <div className="flex items-center gap-6">
-                      <div className="w-14 h-14 border-4 border-[#1A1A1A] bg-[#FDFCF0] flex items-center justify-center group-hover:bg-[#FF5F1F] transition-colors">
-                        <AlertCircle size={24} className="text-[#1A1A1A]" />
-                      </div>
-                      <div>
-                        <div className="text-lg font-black text-[#1A1A1A] uppercase tracking-tighter leading-none">
-                          {product.model}
-                        </div>
-                        <div className="text-[10px] text-[#1A1A1A]/50 font-black uppercase tracking-[0.2em] mt-1">
-                          {product.brand}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-xl font-black text-red-600 tracking-tighter">
-                        {product.stock} pcs
-                      </div>
-                      <div className="text-[9px] font-black uppercase tracking-tighter text-[#1A1A1A]/40 mt-1">
-                        Niveau critique
-                      </div>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-            {lowStockProducts.length > 0 && (
-              <div className="p-8 bg-[#1A1A1A] text-white text-center text-[10px] font-black uppercase tracking-[0.4em]">
-                Urgence de réapprovisionnement
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-      {/* Graphique de Performance Explicite */}
-      <div className="bg-white border-4 border-[#1A1A1A] p-10 shadow-[16px_16px_0px_#1A1A1A] relative overflow-hidden">
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-12 gap-6">
-          <div>
-            <h3 className="text-2xl font-black uppercase tracking-[0.2em] flex items-center gap-3">
-              <Activity size={24} className="text-[#FF5F1F]" />
-              Volume des Ventes (7j)
-            </h3>
-            <p className="text-[10px] font-black uppercase opacity-40 mt-1 tracking-widest italic">
-              Analyse des flux financiers par jour d'opération
-            </p>
-          </div>
-          <div className="flex gap-4">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-[#1A1A1A] border-2 border-[#1A1A1A]"></div>
-              <span className="text-[9px] font-black uppercase">
-                Ventes du jour
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <div className="relative h-80 flex items-end gap-4 md:gap-10 border-l-4 border-b-4 border-[#1A1A1A] pl-4 pb-2 ml-16 mt-8">
-          {/* Label Axe Y (Vertical) */}
-          <div className="absolute -left-20 top-1/2 -rotate-90 origin-center text-[10px] font-black uppercase tracking-[0.3em] text-[#1A1A1A]/30 whitespace-nowrap">
-            Montant (CFA)
-          </div>
-
-          {/* Échelle Axe Y */}
-          <div className="absolute -left-16 inset-y-0 flex flex-col justify-between text-[9px] font-black text-[#1A1A1A]/40 pr-4 py-2 text-right w-14">
-            <span>
-              {Math.max(
-                ...weeklyData.map((d) => d.daily_total || 0),
-                1000,
-              ).toLocaleString()}
-            </span>
-            <span>
-              {(
-                Math.max(...weeklyData.map((d) => d.daily_total || 0), 1000) / 2
-              ).toLocaleString()}
-            </span>
-            <span>0</span>
-          </div>
-
-          {/* Lignes de repère horizontales */}
-          <div className="absolute inset-0 pointer-events-none flex flex-col justify-between py-2">
-            <div className="border-t-2 border-[#1A1A1A]/5 w-full"></div>
-            <div className="border-t-2 border-[#1A1A1A]/5 w-full"></div>
-            <div className="h-0 w-full"></div>
-          </div>
-
-          {weeklyData.length > 0 ? (
-            weeklyData.map((day, idx) => {
-              const maxVal =
-                Math.max(...weeklyData.map((d) => d.daily_total)) || 1;
-              const height = (day.daily_total / maxVal) * 100;
-              return (
-                <div
-                  key={idx}
-                  className="flex-1 flex flex-col items-center group relative h-full justify-end z-10"
-                >
-                  <div
-                    style={{ height: `${Math.max(height, 4)}%` }}
-                    className="w-full bg-[#1A1A1A] border-2 border-[#1A1A1A] group-hover:bg-[#FF5F1F] transition-all relative flex items-center justify-center"
-                  >
-                    {/* Tooltip amélioré */}
-                    <div className="absolute -top-16 left-1/2 -translate-x-1/2 bg-[#1A1A1A] text-white p-3 opacity-0 group-hover:opacity-100 transition-all pointer-events-none z-30 shadow-[6px_6px_0px_#FF5F1F] min-w-[120px] border-2 border-[#FF5F1F]">
-                      <div className="text-[8px] font-black uppercase opacity-60 mb-1">
-                        {day.sale_day}
-                      </div>
-                      <div className="text-xs font-black text-[#FF5F1F]">
-                        {Number(day.daily_total).toLocaleString()} CFA
-                      </div>
-                      <div className="text-[7px] font-mono mt-1 pt-1 border-t border-white/10 italic">
-                        Cumul: {Number(day.cumulative_total).toLocaleString()}
-                      </div>
-                    </div>
-                  </div>
-                  <span className="text-[9px] font-black uppercase mt-4 tracking-tighter whitespace-nowrap bg-white px-1">
-                    {day.sale_day.split("-").slice(1).reverse().join("/")}
-                  </span>
-                </div>
-              );
-            })
-          ) : (
-            <div className="w-full h-full flex items-center justify-center italic opacity-20 text-xs font-black uppercase text-center p-8">
-              En attente de données système...
-            </div>
-          )}
-
-          {/* Label Axe X (Horizontal) */}
-          <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 text-[10px] font-black uppercase tracking-[0.3em] text-[#1A1A1A]/30">
-            Dates d'Opérations
-          </div>
         </div>
       </div>
     </div>

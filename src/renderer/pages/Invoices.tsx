@@ -7,6 +7,14 @@ import {
   Trash2,
   Filter,
   Calendar,
+  Search,
+  ChevronRight,
+  TrendingUp,
+  Receipt,
+  FileCheck,
+  AlertCircle,
+  Clock,
+  Printer,
 } from "lucide-react";
 import { useNotify } from "../components/NotificationProvider";
 
@@ -36,7 +44,6 @@ export default function Invoices() {
   const [dateRange, setDateRange] = useState<DateRange>("all");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
-  const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
 
   useEffect(() => {
     loadInvoices();
@@ -46,68 +53,17 @@ export default function Invoices() {
     filterInvoices();
   }, [invoices, searchTerm, filterStatus, dateRange, dateFrom, dateTo]);
 
-  const getDateRangeValues = () => {
-    const today = new Date();
-    const startOfDay = new Date(
-      today.getFullYear(),
-      today.getMonth(),
-      today.getDate(),
-    );
-    const endOfDay = new Date(
-      today.getFullYear(),
-      today.getMonth(),
-      today.getDate() + 1,
-    );
-
-    switch (dateRange) {
-      case "today":
-        return {
-          from: startOfDay.toISOString().split("T")[0],
-          to: endOfDay.toISOString().split("T")[0],
-        };
-      case "week": {
-        const firstDay = new Date(today);
-        firstDay.setDate(today.getDate() - today.getDay());
-        const lastDay = new Date(firstDay);
-        lastDay.setDate(firstDay.getDate() + 7);
-        return {
-          from: firstDay.toISOString().split("T")[0],
-          to: lastDay.toISOString().split("T")[0],
-        };
-      }
-      case "month": {
-        const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
-        const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 1);
-        return {
-          from: firstDay.toISOString().split("T")[0],
-          to: lastDay.toISOString().split("T")[0],
-        };
-      }
-      case "all":
-      default:
-        return { from: "", to: "" };
-    }
-  };
-
-  const handleQuickDateFilter = (range: DateRange) => {
-    setDateRange(range);
-    if (range === "all") {
-      setDateFrom("");
-      setDateTo("");
-    } else {
-      const { from, to } = getDateRangeValues();
-      setDateFrom(from);
-      setDateTo(to);
-    }
-  };
-
   const loadInvoices = async () => {
     setLoading(true);
-    const res = await window.electronAPI.invoke("invoice:getAll");
-    if (res?.success) {
-      setInvoices(res.data || []);
-    } else {
-      notify("error", "Erreur", "Impossible de charger les factures");
+    try {
+      const res: any = await window.electronAPI.invoke("invoice:getAll");
+      if (res?.success) {
+        setInvoices(res.data || []);
+      } else {
+        notify("error", "Erreur", "Impossible de charger les factures");
+      }
+    } catch (e) {
+      console.error(e);
     }
     setLoading(false);
   };
@@ -115,19 +71,17 @@ export default function Invoices() {
   const filterInvoices = () => {
     let filtered = invoices;
 
-    // Filtre par statut
     if (filterStatus !== "all") {
       filtered = filtered.filter((inv) => inv.status === filterStatus);
     }
 
-    // Filtre par recherche (numéro, client, date)
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
       filtered = filtered.filter(
         (inv) =>
           inv.invoice_number.toLowerCase().includes(term) ||
           (inv.customer_name?.toLowerCase() || "").includes(term) ||
-          inv.invoice_date.includes(term),
+          inv.invoice_date.includes(term)
       );
     }
 
@@ -135,9 +89,9 @@ export default function Invoices() {
   };
 
   const handlePrint = async (invoice: Invoice) => {
-    const htmlRes = await window.electronAPI.invoke(
+    const htmlRes: any = await window.electronAPI.invoke(
       "invoice:generateHTML",
-      invoice.id,
+      invoice.id
     );
     if (htmlRes?.success) {
       const win = window.open("about:blank", "", "width=600,height=800");
@@ -154,9 +108,9 @@ export default function Invoices() {
   };
 
   const handleDownloadHTML = async (invoice: Invoice) => {
-    const htmlRes = await window.electronAPI.invoke(
+    const htmlRes: any = await window.electronAPI.invoke(
       "invoice:generateHTML",
-      invoice.id,
+      invoice.id
     );
     if (htmlRes?.success) {
       const element = document.createElement("a");
@@ -167,147 +121,186 @@ export default function Invoices() {
       element.click();
       document.body.removeChild(element);
       notify("success", "Téléchargé", `${invoice.invoice_number} téléchargée`);
+    } else {
+       notify("error", "Erreur", "Échec du téléchargement");
     }
   };
 
   if (loading) {
     return (
-      <div className="max-w-7xl mx-auto pt-8 pb-32 page-fade-in flex items-center justify-center min-h-[500px]">
-        <div className="text-center">
-          <FileText size={48} className="mx-auto mb-4 opacity-30" />
-          <p className="text-lg font-black uppercase">Chargement...</p>
+      <div className="flex flex-col items-center justify-center min-h-[60vh] animate-pulse">
+        <div className="p-8 bg-white rounded-[3rem] shadow-xl shadow-slate-200/50">
+           <FileText size={48} className="text-indigo-200 mb-6 mx-auto" />
+           <p className="text-slate-400 font-bold tracking-tight">Analyse des registres...</p>
         </div>
       </div>
     );
   }
 
+  const totalInvoiced = filteredInvoices.reduce((sum, inv) => sum + inv.total_amount, 0);
+
   return (
-    <div className="max-w-7xl mx-auto pt-8 pb-32 page-fade-in">
-      <header className="border-b-8 border-[#1A1A1A] pb-10 mb-12">
-        <div className="flex items-center gap-4 mb-6">
-          <div className="p-4 bg-[#1A1A1A] text-white shadow-[8px_8px_0px_#FF5F1F]">
-            <FileText size={32} />
-          </div>
-          <h1 className="text-5xl font-black tracking-tighter text-[#1A1A1A] uppercase italic">
-            Historique Factures
-          </h1>
+    <div className="animate-in fade-in duration-700 space-y-10">
+      {/* Header Section */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div>
+           <div className="flex items-center gap-3 mb-4">
+              <div className="p-2.5 bg-rose-600 rounded-xl shadow-lg shadow-rose-600/20 rotate-3">
+                 <Receipt className="text-white" size={24} />
+              </div>
+              <h1 className="text-3xl font-black text-slate-900 tracking-tight italic">Journal des Factures</h1>
+           </div>
+           <p className="text-slate-500 font-medium ml-1">Consultez et gérez l'historique de vos ventes</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Chercher numéro, client, date..."
+        {/* Stats Summary Area */}
+        <div className="flex items-center gap-4">
+           <div className="px-6 py-4 bg-white border border-slate-100 rounded-3xl shadow-sm">
+              <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Volume Total</p>
+              <h4 className="text-2xl font-black text-slate-900 tracking-tighter">
+                {totalInvoiced.toLocaleString()} <span className="text-xs text-slate-400 ml-1">CFA</span>
+              </h4>
+           </div>
+           <div className="px-6 py-4 bg-slate-900 border border-slate-800 rounded-3xl shadow-xl shadow-indigo-600/5">
+              <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1">Documents</p>
+              <h4 className="text-2xl font-black text-white tracking-tighter">
+                {filteredInvoices.length} <span className="text-xs text-slate-500 ml-1">Unités</span>
+              </h4>
+           </div>
+        </div>
+      </div>
+
+      {/* Control Bar: Filters & Search */}
+      <div className="glass-card p-6 rounded-[2.5rem] border-slate-200/60 shadow-xl shadow-slate-200/40 flex flex-col lg:flex-row items-center gap-6">
+         <div className="relative group flex-1 w-full">
+            <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-indigo-500 transition-colors" size={20} />
+            <input 
+              type="text" 
+              placeholder="Rechercher par N° de facture, client ou date..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="input-brut w-full pl-6 py-4"
+              className="w-full bg-slate-50 border border-slate-200 rounded-2xl pl-14 pr-6 py-4 text-sm font-bold placeholder:text-slate-300 outline-none focus:bg-white focus:border-indigo-400 transition-all focus:ring-4 focus:ring-indigo-500/5"
             />
+         </div>
+
+         <div className="flex items-center gap-3 p-1.5 bg-slate-100 rounded-2xl border border-slate-200/50 w-full lg:w-auto">
+            {(["all", "paid", "pending", "cancelled"] as const).map((status) => (
+              <button
+                key={status}
+                onClick={() => setFilterStatus(status)}
+                className={`px-6 py-2.5 rounded-xl text-[10px] font-black tracking-widest uppercase transition-all ${
+                  filterStatus === status 
+                   ? "bg-white text-slate-900 shadow-lg shadow-slate-200/50 border border-slate-200/60" 
+                   : "text-slate-400 hover:text-slate-600"
+                }`}
+              >
+                {status === "all" ? "Toutes" : 
+                 status === "paid" ? "Payées" : 
+                 status === "pending" ? "Attente" : "Annulées"}
+              </button>
+            ))}
+         </div>
+
+         <button 
+           onClick={loadInvoices}
+           className="p-4 bg-indigo-600 text-white rounded-2xl shadow-lg shadow-indigo-600/20 hover:bg-slate-900 transition-all active:scale-95 group"
+         >
+            <TrendingUp size={20} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+         </button>
+      </div>
+
+      {/* Main Content: Table List */}
+      <div className="space-y-4">
+        {filteredInvoices.length === 0 ? (
+          <div className="py-24 bg-white rounded-[3rem] border border-dashed border-slate-200 flex flex-col items-center justify-center text-center">
+             <div className="p-6 bg-slate-50 rounded-full mb-4">
+               <Receipt size={40} className="text-slate-200" />
+             </div>
+             <p className="text-slate-400 font-black uppercase tracking-widest text-xs">Aucune information trouvée dans le journal</p>
           </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-6">
+            {filteredInvoices.map((invoice) => (
+              <div 
+                key={invoice.id}
+                className="group p-8 bg-white border border-slate-100 rounded-[2.5rem] shadow-sm hover:shadow-2xl hover:shadow-indigo-600/5 hover:-translate-y-1 transition-all duration-500 relative overflow-hidden"
+              >
+                {/* Status indicator line */}
+                <div className={`absolute top-0 left-10 w-16 h-1.5 rounded-b-full ${
+                  invoice.status === 'paid' ? 'bg-emerald-500' : 
+                  invoice.status === 'pending' ? 'bg-amber-500' : 'bg-rose-500'
+                }`}></div>
 
-          <div className="flex gap-2">
-            {(["all", "paid", "pending", "cancelled"] as const).map(
-              (status) => (
-                <button
-                  key={status}
-                  onClick={() => setFilterStatus(status)}
-                  className={`flex-1 py-4 font-black text-[10px] uppercase border-4 transition-all ${
-                    filterStatus === status
-                      ? "bg-[#1A1A1A] text-white border-[#1A1A1A]"
-                      : "bg-white border-[#1A1A1A] text-[#1A1A1A]"
-                  }`}
-                >
-                  {status === "all"
-                    ? "Tous"
-                    : status === "paid"
-                      ? "Payées"
-                      : status === "pending"
-                        ? "En attente"
-                        : "Annulées"}
-                </button>
-              ),
-            )}
-          </div>
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8">
+                   <div className="flex items-center gap-6">
+                      <div className={`p-4 rounded-3xl ${
+                         invoice.status === 'paid' ? 'bg-emerald-50 text-emerald-600' : 
+                         invoice.status === 'pending' ? 'bg-amber-50 text-amber-600' : 'bg-rose-50 text-rose-600'
+                      }`}>
+                         <FileCheck size={28} />
+                      </div>
+                      <div>
+                         <div className="flex items-center gap-2 mb-1">
+                           <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Facture:</p>
+                           <p className="text-sm font-black text-slate-900 tracking-tight">{invoice.invoice_number}</p>
+                         </div>
+                         <h3 className="text-lg font-black text-slate-800 tracking-tight uppercase flex items-center gap-2 leading-none">
+                           {invoice.customer_name || "Client de passage"}
+                         </h3>
+                      </div>
+                   </div>
 
-          <div className="text-right flex items-center justify-end gap-4">
-            <span className="font-black text-[#1A1A1A]">
-              {filteredInvoices.length}
-            </span>
-            <span className="text-xs font-black uppercase opacity-60">
-              Facturettes
-            </span>
-          </div>
-        </div>
-      </header>
+                   <div className="grid grid-cols-2 md:grid-cols-3 gap-10">
+                      <div>
+                         <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1 flex items-center gap-1.5">
+                           <Calendar size={12} /> Émission
+                         </p>
+                         <p className="text-sm font-extrabold text-slate-700">
+                           {new Date(invoice.invoice_date).toLocaleDateString("fr-FR", { day: '2-digit', month: 'long', year: 'numeric' })}
+                         </p>
+                      </div>
+                      <div>
+                         <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1 flex items-center gap-1.5">
+                           <Clock size={12} /> Articles
+                         </p>
+                         <p className="text-sm font-extrabold text-slate-700">{invoice.item_count} unités vendues</p>
+                      </div>
+                      <div className="col-span-2 md:col-span-1">
+                         <p className="text-[10px] font-black uppercase tracking-widest text-indigo-400 mb-1">Montant Transaction</p>
+                         <p className="text-2xl font-black text-slate-900 tracking-tighter">
+                           {invoice.total_amount.toLocaleString()} <span className="text-xs text-slate-400 font-bold ml-1">CFA</span>
+                         </p>
+                      </div>
+                   </div>
 
-      {filteredInvoices.length === 0 ? (
-        <div className="py-20 text-center opacity-30 font-black uppercase tracking-widest text-xs border-4 border-dashed border-[#1A1A1A]">
-          Aucune facture trouvée
-        </div>
-      ) : (
-        <div className="space-y-4">
-          {filteredInvoices.map((invoice) => (
-            <div
-              key={invoice.id}
-              className="bg-white border-4 border-[#1A1A1A] shadow-[8px_8px_0px_#1A1A1A] hover:translate-x-[-4px] hover:translate-y-[-4px] transition-all"
-            >
-              <div className="p-6 grid grid-cols-1 md:grid-cols-5 gap-4 items-center">
-                <div>
-                  <div className="text-[10px] font-black uppercase opacity-60 mb-1">
-                    N° Facture
-                  </div>
-                  <div className="font-black text-lg">
-                    {invoice.invoice_number}
-                  </div>
-                </div>
-
-                <div>
-                  <div className="text-[10px] font-black uppercase opacity-60 mb-1">
-                    Client
-                  </div>
-                  <div className="font-black text-sm">
-                    {invoice.customer_name || "—"}
-                  </div>
-                </div>
-
-                <div>
-                  <div className="text-[10px] font-black uppercase opacity-60 mb-1">
-                    Date
-                  </div>
-                  <div className="font-black text-sm">
-                    {new Date(invoice.invoice_date).toLocaleDateString("fr-FR")}
-                  </div>
-                </div>
-
-                <div>
-                  <div className="text-[10px] font-black uppercase opacity-60 mb-1">
-                    Montant
-                  </div>
-                  <div className="font-black text-xl text-[#FF5F1F]">
-                    {invoice.total_amount.toLocaleString()} CFA
-                  </div>
-                </div>
-
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => handlePrint(invoice)}
-                    className="flex-1 bg-[#1A1A1A] text-white p-3 font-black text-[10px] uppercase hover:bg-[#FF5F1F] transition-colors flex items-center justify-center gap-2"
-                  >
-                    <Eye size={16} />
-                    Imprimer
-                  </button>
-                  <button
-                    onClick={() => handleDownloadHTML(invoice)}
-                    className="flex-1 bg-[#FF5F1F] text-white p-3 font-black text-[10px] uppercase hover:bg-[#1A1A1A] transition-colors flex items-center justify-center gap-2"
-                  >
-                    <Download size={16} />
-                    HTML
-                  </button>
+                   <div className="flex items-center gap-3">
+                      <button 
+                        onClick={() => handlePrint(invoice)}
+                        className="flex-1 lg:flex-none flex items-center justify-center gap-2.5 px-6 py-4 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-indigo-600 transition-all group"
+                      >
+                         <Printer size={16} className="group-hover:scale-110 transition-transform" />
+                         <span>Imprimer</span>
+                      </button>
+                      <button 
+                        onClick={() => handleDownloadHTML(invoice)}
+                        className="flex items-center justify-center p-4 bg-slate-50 text-slate-400 border border-slate-100 rounded-2xl hover:text-indigo-600 hover:bg-white hover:border-indigo-100 transition-all group"
+                        title="Télécharger l'original"
+                      >
+                         <Download size={20} className="group-hover:translate-y-0.5 transition-transform" />
+                      </button>
+                      <button 
+                         className="flex items-center justify-center p-4 bg-slate-50 text-slate-300 border border-slate-100 rounded-2xl hover:text-rose-500 hover:bg-rose-50 transition-all opacity-50 hover:opacity-100"
+                         title="Plus d'actions"
+                      >
+                         <AlertCircle size={20} />
+                      </button>
+                   </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

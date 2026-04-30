@@ -1,7 +1,7 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
 import {
-  Home,
+  LayoutDashboard,
   Package,
   ShoppingCart,
   Users,
@@ -9,13 +9,21 @@ import {
   LogOut,
   Settings,
   FileText,
+  ShieldCheck,
+  ChevronRight,
+  HardDriveDownload,
 } from "lucide-react";
 
-export default function Sidebar({ onLogout, user }) {
+interface SidebarProps {
+  onLogout: () => void;
+  user: any;
+}
+
+export default function Sidebar({ onLogout, user }: SidebarProps) {
   const menuItems = [
     {
       path: "/",
-      icon: Home,
+      icon: LayoutDashboard,
       label: "Tableau de bord",
       roles: ["admin", "vendeur"],
     },
@@ -27,14 +35,14 @@ export default function Sidebar({ onLogout, user }) {
     },
     {
       path: "/receive",
-      icon: Package,
-      label: "Réception",
+      icon: HardDriveDownload,
+      label: "Flux Entrants",
       roles: ["admin"],
     },
     {
       path: "/sales",
       icon: ShoppingCart,
-      label: "Ventes",
+      label: "Nouvelle Vente",
       roles: ["admin", "vendeur"],
     },
     {
@@ -50,7 +58,13 @@ export default function Sidebar({ onLogout, user }) {
       roles: ["admin", "vendeur"],
     },
     { path: "/reports", icon: BarChart3, label: "Analyses", roles: ["admin"] },
-    { path: "/users", icon: Settings, label: "Système", roles: ["admin"] },
+    {
+      path: "/audits",
+      icon: ShieldCheck,
+      label: "Sécurité & Audit",
+      roles: ["admin"],
+    },
+    { path: "/users", icon: Settings, label: "Paramètres Système", roles: ["admin"] },
   ];
 
   const visibleItems = menuItems.filter((item) =>
@@ -58,86 +72,103 @@ export default function Sidebar({ onLogout, user }) {
   );
 
   return (
-    <aside className="w-72 h-screen bg-[#FDFCF0] border-r-[6px] border-[#1A1A1A] flex flex-col relative shrink-0 z-50 overflow-hidden">
-      {/* Texture Papier */}
-      <div className="absolute inset-0 pointer-events-none opacity-10 mix-blend-multiply bg-[url('https://www.transparenttextures.com/patterns/handmade-paper.png')]"></div>
-
+    <aside className="w-80 h-screen glass-sidebar flex flex-col relative shrink-0 z-50">
       {/* Brand Section */}
-      <div className="p-8 pb-0 relative z-10">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-12 h-12 bg-[#FF5F1F] border-[3px] border-[#1A1A1A] flex items-center justify-center rotate-[-3deg] shadow-[4px_4px_0px_#1A1A1A]">
-            <span className="text-white font-black text-2xl italic uppercase">
-              F
-            </span>
+      <div className="p-8">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-2xl shadow-indigo-500/20 rotate-3">
+            <Package className="text-white" size={28} />
           </div>
           <div>
-            <h2 className="text-3xl font-black text-[#1A1A1A] tracking-tighter leading-none">
-              Fely
+            <h2 className="text-2xl font-black text-white tracking-tighter leading-none">
+              FLEXY<span className="text-indigo-500">STORE</span>
             </h2>
-            <p className="text-[9px] font-black uppercase tracking-[0.2em] text-[#1A1A1A]/40 mt-1">
-              Electronique
-            </p>
+            <div className="flex items-center gap-1.5 mt-1.5">
+              <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></div>
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">
+                V3.0 Enterprise
+              </p>
+            </div>
           </div>
         </div>
-        <div className="h-1 w-full bg-[#1A1A1A]/10"></div>
       </div>
 
-      {/* Navigation scrollable */}
-      <nav className="flex-1 overflow-y-auto custom-scrollbar px-6 py-8 space-y-3 relative z-10 pr-2">
-        <div className="text-[9px] font-black uppercase tracking-[0.3em] text-[#1A1A1A]/30 mb-4 px-2 italic">
-          Menu Principal
+      {/* Navigation */}
+      <nav className="flex-1 overflow-y-auto custom-scrollbar px-6 py-4 space-y-1.5">
+        <div className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-600 mb-6 px-4">
+          Navigation Principale
         </div>
         {visibleItems.map((item) => (
           <NavLink
             key={item.path}
             to={item.path}
             className={({ isActive }) => `
-              relative flex items-center gap-4 px-4 py-3.5 transition-all border-2 border-transparent group
+              flex items-center justify-between px-4 py-3.5 rounded-xl transition-all duration-300 group relative
               ${
                 isActive
-                  ? "bg-[#1A1A1A] text-[#FDFCF0] border-[#1A1A1A] shadow-[6px_6px_0px_#FF5F1F] translate-x-[-2px] translate-y-[-2px]"
-                  : "text-[#1A1A1A] hover:bg-[#1A1A1A]/5 hover:translate-x-1"
+                  ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/20"
+                  : "text-slate-400 hover:text-white hover:bg-white/5"
               }
             `}
           >
             {({ isActive }) => (
               <>
-                <item.icon
-                  size={20}
-                  className={`${isActive ? "text-[#FF5F1F]" : "text-[#1A1A1A]/60"}`}
+                <div className="flex items-center gap-3.5">
+                  <item.icon
+                    size={20}
+                    className={`transition-colors duration-300 ${
+                      isActive ? "text-white" : "text-slate-500 group-hover:text-indigo-400"
+                    }`}
+                  />
+                  <span className="text-[14px] font-medium tracking-tight">
+                    {item.label}
+                  </span>
+                </div>
+                <ChevronRight 
+                  size={14} 
+                  className={`transition-all duration-300 transform ${
+                    isActive ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-2 group-hover:opacity-40 group-hover:translate-x-0"
+                  }`} 
                 />
-                <span className="text-[10px] font-black uppercase tracking-[0.15em]">
-                  {item.label}
-                </span>
+                {isActive && (
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-white rounded-r-full" />
+                )}
               </>
             )}
           </NavLink>
         ))}
       </nav>
 
-      {/* Footer Session Fixe */}
-      <div className="p-6 pt-4 border-t-4 border-[#1A1A1A] relative z-10 bg-[#FDFCF0]/80 backdrop-blur-sm">
-        <div className="mb-5 bg-white border-2 border-[#1A1A1A] p-4 shadow-[4px_4px_0px_#1A1A1A]/10">
-          <div className="flex items-center gap-2 mb-1">
-            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
-            <span className="text-[8px] font-black uppercase tracking-widest text-[#1A1A1A]/40">
-              Agent Connecté
-            </span>
-          </div>
-          <p className="text-sm font-black text-[#1A1A1A] truncate uppercase italic">
-            {user?.name || "Session Admin"}
-          </p>
-          <div className="mt-2 text-[7px] font-black uppercase bg-[#1A1A1A] text-white px-2 py-0.5 inline-block tracking-widest">
-            Rôle: {user?.role || "Indéfini"}
+      {/* User Session Section */}
+      <div className="p-6 mt-auto border-t border-slate-800/50 bg-slate-900/40">
+        <div className="p-4 rounded-2xl bg-white/5 border border-white/5 mb-4 group hover:bg-white/10 transition-all duration-300 cursor-pointer">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-rose-500 p-[2px]">
+              <div className="w-full h-full rounded-[10px] bg-slate-900 flex items-center justify-center text-white font-bold text-sm">
+                {user?.name?.charAt(0) || "A"}
+              </div>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-bold text-white truncate group-hover:text-indigo-300 transition-colors">
+                {user?.name || "Administrateur"}
+              </p>
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <span className="badge bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                  {user?.role || "Admin"}
+                </span>
+                <div className="w-1 h-1 rounded-full bg-slate-600"></div>
+                <span className="text-[10px] text-slate-500 font-medium">En ligne</span>
+              </div>
+            </div>
           </div>
         </div>
 
         <button
           onClick={onLogout}
-          className="w-full flex items-center justify-center gap-3 py-4 bg-[#1A1A1A] text-white border-[3px] border-[#1A1A1A] shadow-[4px_4px_0px_#FF5F1F] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none hover:bg-[#FF5F1F] transition-all font-black text-[9px] uppercase tracking-[0.2em]"
+          className="w-full flex items-center justify-center gap-2.5 py-3.5 bg-slate-800 text-slate-400 rounded-xl hover:bg-rose-600 hover:text-white transition-all duration-300 font-bold text-xs uppercase tracking-widest shadow-sm group"
         >
-          <LogOut size={16} />
-          <span>Fermer Session</span>
+          <LogOut size={16} className="group-hover:-translate-x-1 transition-transform" />
+          <span>Fermer la Session</span>
         </button>
       </div>
     </aside>

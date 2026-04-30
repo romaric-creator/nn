@@ -54,6 +54,7 @@ type ValidChannel =
   | "stock:history"
   | "stock:bulkReceive"
   // Ventes
+  | "sale:checkout"
   | "sale:create"
   | "sale:cancel"
   | "sale:getAll"
@@ -86,6 +87,12 @@ type ValidChannel =
   // Audit
   | "audit:getLogs"
   | "audit:getUserLogs"
+  // Factures
+  | "invoice:createFromSale"
+  | "invoice:generateHTML"
+  | "invoice:getById"
+  | "invoice:getAll"
+  | "invoice:getByCustomerId"
   // Base de données
   | "db:backup"
   | "db:restore"

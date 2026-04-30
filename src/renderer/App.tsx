@@ -1,5 +1,5 @@
 // src/renderer/App.tsx
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Routes, Route, useNavigate } from "react-router-dom";
 
 import Sidebar from "./components/Sidebar";
@@ -10,6 +10,7 @@ import Sales from "./pages/Sales";
 import Invoices from "./pages/Invoices";
 import Customers from "./pages/Customers";
 import Reports from "./pages/Reports";
+import Audits from "./pages/Audits";
 import Users from "./pages/Users";
 import Login from "./pages/Login";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -82,43 +83,60 @@ export default function App() {
   return (
     <ErrorBoundary>
       <NotificationProvider>
-        <div className="flex h-screen bg-[#FDFCF0] font-sans antialiased text-[#1A1A1A] overflow-hidden selection:bg-[#1A1A1A] selection:text-[#FDFCF0]">
+        <div className="flex h-screen bg-slate-50 font-['Outfit'] antialiased text-slate-900 overflow-hidden selection:bg-indigo-100 selection:text-indigo-900">
+          {/* Subtle Global Background Overlay */}
+          <div className="fixed inset-0 bg-grid opacity-[0.03] pointer-events-none"></div>
+          
           <Sidebar onLogout={handleLogout} user={user} />
-          <main className="flex-1 overflow-y-auto p-10 custom-scrollbar relative">
-            {/* Texture Papier */}
-            <div className="absolute inset-0 pointer-events-none opacity-10 mix-blend-multiply bg-[url('https://www.transparenttextures.com/patterns/handmade-paper.png')]"></div>
-
-            <div className="max-w-7xl mx-auto relative z-10">
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route
-                  path="/stock"
-                  element={user?.role === "admin" ? <Stock /> : <Home />}
-                />
-                <Route
-                  path="/receive"
-                  element={user?.role === "admin" ? <Receive /> : <Home />}
-                />
-                <Route path="/sales" element={<Sales />} />
-                <Route path="/invoices" element={<Invoices />} />
-                <Route path="/customers" element={<Customers />} />
-                <Route
-                  path="/reports"
-                  element={user?.role === "admin" ? <Reports /> : <Home />}
-                />
-                <Route
-                  path="/users"
-                  element={user?.role === "admin" ? <Users /> : <Home />}
-                />
-                <Route
-                  path="*"
-                  element={
-                    <div className="text-center py-32 text-slate-500 font-black uppercase tracking-[0.3em] text-[10px]">
-                      Système: Page Non Reconnue
-                    </div>
-                  }
-                />
-              </Routes>
+          
+          <main className="flex-1 overflow-y-auto custom-scrollbar relative z-10 p-6 md:p-10 lg:p-12">
+            <div className="max-w-[1600px] mx-auto">
+              {/* Page Transition Wrapper can be added here if framer-motion was available */}
+              <div className="min-h-full">
+                <Routes>
+                  <Route path="/" element={<Home />} />
+                  <Route
+                    path="/stock"
+                    element={user?.role === "admin" ? <Stock /> : <Home />}
+                  />
+                  <Route
+                    path="/receive"
+                    element={user?.role === "admin" ? <Receive /> : <Home />}
+                  />
+                  <Route path="/sales" element={<Sales />} />
+                  <Route path="/invoices" element={<Invoices />} />
+                  <Route path="/customers" element={<Customers />} />
+                  <Route
+                    path="/reports"
+                    element={user?.role === "admin" ? <Reports /> : <Home />}
+                  />
+                  <Route
+                    path="/audits"
+                    element={user?.role === "admin" ? <Audits /> : <Home />}
+                  />
+                  <Route
+                    path="/users"
+                    element={user?.role === "admin" ? <Users /> : <Home />}
+                  />
+                  <Route
+                    path="*"
+                    element={
+                      <div className="flex flex-col items-center justify-center py-32 text-slate-400">
+                        <div className="text-8xl font-black mb-6 text-slate-200 tracking-tighter">404</div>
+                        <div className="text-xs font-black uppercase tracking-[0.4em] text-slate-400">
+                          Destination Inconnue
+                        </div>
+                        <button 
+                          onClick={() => navigate("/")}
+                          className="mt-10 premium-btn-secondary px-8"
+                        >
+                          Retour au Tableau de Bord
+                        </button>
+                      </div>
+                    }
+                  />
+                </Routes>
+              </div>
             </div>
           </main>
         </div>

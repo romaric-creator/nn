@@ -12,7 +12,12 @@ import {
   Fingerprint,
   Activity,
   ShieldCheck,
-  CheckCircle2
+  CheckCircle2,
+  MoreVertical,
+  ChevronRight,
+  Plus,
+  Key,
+  BadgeCheck
 } from 'lucide-react';
 import { useNotify } from '../components/NotificationProvider';
 
@@ -28,13 +33,17 @@ export default function UsersPage() {
   const { notify } = useNotify();
   const [users, setUsers] = useState<UserAccount[]>([]);
   const [loading, setLoading] = useState(true);
-  const [form, setForm] = useState({ name: '', login: '', password: '', role: 'vendeur' });
+  const [form, setForm] = useState({ name: '', login: '', password: '', role: 'vendeur' as 'admin' | 'vendeur' });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const loadUsers = async () => {
     setLoading(true);
-    const res = await window.electronAPI.invoke('user:getAll');
-    if (res.success) setUsers(res.data);
+    try {
+      const res: any = await window.electronAPI.invoke('user:getAll');
+      if (res.success) setUsers(res.data);
+    } catch (error) {
+      console.error(error);
+    }
     setLoading(false);
   };
 
@@ -47,208 +56,255 @@ export default function UsersPage() {
     if (!form.name || !form.login || !form.password) return notify('error', 'Champs requis', 'Veuillez remplir toutes les informations.');
     
     setIsSubmitting(true);
-    const res = await window.electronAPI.invoke('user:create', form);
-    if (res.success) {
-      notify('success', 'Opérateur créé', `L'accès pour ${form.name} est maintenant actif.`);
-      setForm({ name: '', login: '', password: '', role: 'vendeur' });
-      loadUsers();
-    } else {
-      notify('error', 'Échec création', res.message || 'Une erreur est survenue.');
+    try {
+      const res: any = await window.electronAPI.invoke('user:create', form);
+      if (res.success) {
+        notify('success', 'Opérateur créé', `L'accès pour ${form.name} est maintenant actif.`);
+        setForm({ name: '', login: '', password: '', role: 'vendeur' });
+        loadUsers();
+      } else {
+        notify('error', 'Échec création', res.message || 'Une erreur est survenue.');
+      }
+    } catch (error) {
+      console.error(error);
     }
     setIsSubmitting(false);
   };
 
   const handleDeactivate = async (id: number) => {
     if (confirm('Voulez-vous révoquer définitivement l\'accès de cet opérateur ?')) {
-      const res = await window.electronAPI.invoke('user:deactivate', id);
-      if (res.success) {
-        notify('warning', 'Accès révoqué', 'L\'opérateur ne peut plus se connecter au système.');
-        loadUsers();
+      try {
+        const res: any = await window.electronAPI.invoke('user:deactivate', id);
+        if (res.success) {
+          notify('warning', 'Accès révoqué', 'L\'opérateur ne peut plus se connecter au système.');
+          loadUsers();
+        }
+      } catch (error) {
+        console.error(error);
       }
     }
   };
 
-  return (
-    <div className="space-y-16 pb-32 max-w-7xl mx-auto pt-8">
-      {/* Header */}
-      <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8 border-b-8 border-[#1A1A1A] pb-12">
-        <div>
-          <div className="flex items-center gap-4 mb-4">
-             <div className="p-4 bg-[#1A1A1A] text-white shadow-[8px_8px_0px_#FF5F1F]">
-                <Settings size={32} />
-             </div>
-             <h1 className="text-6xl font-black tracking-tighter text-[#1A1A1A] uppercase italic">Personnel</h1>
-          </div>
-          <p className="text-3xl font-serif italic font-black text-[#1A1A1A] opacity-80 leading-tight">
-             Contrôle des accès et habilitations de sécurité.
-          </p>
+  if (loading && users.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] animate-pulse">
+        <div className="p-10 bg-white rounded-[3rem] shadow-xl">
+           <Settings size={48} className="text-indigo-200 mb-6 mx-auto" />
+           <p className="text-slate-400 font-bold tracking-tight">Configuration des privilèges...</p>
         </div>
-      </header>
+      </div>
+    );
+  }
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
-        {/* FORMULAIRE (Gauche) */}
-        <div className="lg:col-span-5 space-y-10 sticky top-10">
-          <div className="flex items-center gap-4">
-             <div className="h-1.5 w-12 bg-[#FF5F1F]"></div>
-             <h2 className="text-xl font-black uppercase tracking-[0.4em] text-[#1A1A1A]">Nouvel Agent</h2>
+  return (
+    <div className="animate-in fade-in duration-700 space-y-12 pb-20">
+      {/* Header Section */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
+        <div>
+           <div className="flex items-center gap-3 mb-4">
+              <div className="p-2.5 bg-indigo-600 rounded-xl shadow-lg shadow-indigo-600/20 rotate-3">
+                 <Settings className="text-white" size={24} />
+              </div>
+              <h1 className="text-3xl font-black text-slate-900 tracking-tight italic">Gestion d'Équipe</h1>
+           </div>
+           <p className="text-slate-500 font-medium ml-1">Administrez les comptes utilisateurs et les droits d'accès</p>
+        </div>
+
+        <div className="px-6 py-4 bg-white border border-slate-100 rounded-[2rem] shadow-sm flex items-center gap-4">
+           <div className="p-2 bg-emerald-50 text-emerald-600 rounded-lg">
+             <BadgeCheck size={18} />
+           </div>
+           <div>
+              <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest leading-none mb-1">Session</p>
+              <p className="text-xs font-black text-slate-900">Privilèges Administrateur</p>
+           </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-12 items-start">
+        {/* Registration Form Column */}
+        <div className="xl:col-span-4 space-y-8 sticky top-10">
+          <div className="flex items-center gap-2 px-2">
+             <Plus size={16} className="text-indigo-500" />
+             <h2 className="text-[11px] font-black uppercase tracking-[0.25em] text-slate-400">Nouvelle Habilitation</h2>
           </div>
 
-          <div className="bg-white border-4 border-[#1A1A1A] p-10 shadow-[16px_16px_0px_#1A1A1A] relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-[#1A1A1A]/5 -rotate-45 translate-x-12 -translate-y-12"></div>
+          <div className="glass-card p-10 rounded-[3rem] border-slate-200/60 shadow-xl shadow-slate-200/40 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 blur-3xl -mr-16 -mt-16"></div>
             
             <form onSubmit={handleCreateUser} className="space-y-8 relative z-10">
-              <div className="space-y-3">
-                <label className="text-[10px] font-black uppercase tracking-[0.3em] text-[#1A1A1A]/40 ml-1">Nom de l'Opérateur</label>
-                <div className="relative group">
-                  <User size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#1A1A1A]/30 group-focus-within:text-[#FF5F1F]" />
-                  <input
-                    type="text"
-                    required
-                    placeholder="Ex: Samuel Eto'o"
-                    className="w-full bg-[#FDFCF0] border-4 border-[#1A1A1A] p-4 pl-12 font-black placeholder:text-[#1A1A1A]/10 focus:shadow-[6px_6px_0px_#1A1A1A] outline-none transition-all uppercase"
-                    value={form.name}
-                    onChange={(e) => setForm({...form, name: e.target.value})}
-                  />
+              <div className="space-y-6">
+                <div>
+                  <label className="text-xs font-black uppercase tracking-widest text-slate-400 block mb-3 ml-1">Nom Complet</label>
+                  <div className="relative group">
+                    <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-indigo-600 transition-colors" size={18} />
+                    <input
+                      type="text"
+                      required
+                      placeholder="Ex: David Mensah"
+                      className="premium-input pl-12 uppercase"
+                      value={form.name}
+                      onChange={(e) => setForm({...form, name: e.target.value})}
+                    />
+                  </div>
                 </div>
-              </div>
 
-              <div className="space-y-3">
-                <label className="text-[10px] font-black uppercase tracking-[0.3em] text-[#1A1A1A]/40 ml-1">Identifiant (Login)</label>
-                <div className="relative group">
-                  <Fingerprint size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#1A1A1A]/30 group-focus-within:text-[#FF5F1F]" />
-                  <input
-                    type="text"
-                    required
-                    placeholder="matricule"
-                    className="w-full bg-[#FDFCF0] border-4 border-[#1A1A1A] p-4 pl-12 font-black placeholder:text-[#1A1A1A]/10 focus:shadow-[6px_6px_0px_#1A1A1A] outline-none transition-all"
-                    value={form.login}
-                    onChange={(e) => setForm({...form, login: e.target.value})}
-                  />
+                <div>
+                  <label className="text-xs font-black uppercase tracking-widest text-slate-400 block mb-3 ml-1">Identifiant Système</label>
+                  <div className="relative group">
+                    <Fingerprint className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-indigo-600 transition-colors" size={18} />
+                    <input
+                      type="text"
+                      required
+                      placeholder="Identifiant de connexion"
+                      className="premium-input pl-12"
+                      value={form.login}
+                      onChange={(e) => setForm({...form, login: e.target.value})}
+                    />
+                  </div>
                 </div>
-              </div>
 
-              <div className="space-y-3">
-                <label className="text-[10px] font-black uppercase tracking-[0.3em] text-[#1A1A1A]/40 ml-1">Clé d'accès (Password)</label>
-                <div className="relative group">
-                  <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#1A1A1A]/30 group-focus-within:text-[#FF5F1F]" />
-                  <input
-                    type="password"
-                    required
-                    placeholder="••••••••"
-                    className="w-full bg-[#FDFCF0] border-4 border-[#1A1A1A] p-4 pl-12 font-black placeholder:text-[#1A1A1A]/10 focus:shadow-[6px_6px_0px_#1A1A1A] outline-none transition-all"
-                    value={form.password}
-                    onChange={(e) => setForm({...form, password: e.target.value})}
-                  />
+                <div>
+                  <label className="text-xs font-black uppercase tracking-widest text-slate-400 block mb-3 ml-1">Mot De Passe Protegé</label>
+                  <div className="relative group">
+                    <Key className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-indigo-600 transition-colors" size={18} />
+                    <input
+                      type="password"
+                      required
+                      placeholder="••••••••••••"
+                      className="premium-input pl-12"
+                      value={form.password}
+                      onChange={(e) => setForm({...form, password: e.target.value})}
+                    />
+                  </div>
                 </div>
-              </div>
 
-              <div className="space-y-3">
-                <label className="text-[10px] font-black uppercase tracking-[0.3em] text-[#1A1A1A]/40 ml-1">Rôle Système</label>
-                <div className="grid grid-cols-2 gap-4">
-                   <button 
-                     type="button"
-                     onClick={() => setForm({...form, role: 'vendeur'})}
-                     className={`py-4 border-4 border-[#1A1A1A] font-black uppercase text-[10px] tracking-widest transition-all ${form.role === 'vendeur' ? 'bg-[#1A1A1A] text-white shadow-[6px_6px_0px_#FF5F1F]' : 'bg-white text-[#1A1A1A]'}`}
-                   >
-                     Vendeur
-                   </button>
-                   <button 
-                     type="button"
-                     onClick={() => setForm({...form, role: 'admin'})}
-                     className={`py-4 border-4 border-[#1A1A1A] font-black uppercase text-[10px] tracking-widest transition-all ${form.role === 'admin' ? 'bg-[#1A1A1A] text-white shadow-[6px_6px_0px_#FF5F1F]' : 'bg-white text-[#1A1A1A]'}`}
-                   >
-                     Admin
-                   </button>
+                <div>
+                  <label className="text-xs font-black uppercase tracking-widest text-slate-400 block mb-3 ml-1">Niveau d'Autorité</label>
+                  <div className="grid grid-cols-2 gap-3 p-1.5 bg-slate-100 rounded-2xl border border-slate-200/50">
+                     <button 
+                       type="button"
+                       onClick={() => setForm({...form, role: 'vendeur'})}
+                       className={`py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${form.role === 'vendeur' ? 'bg-white text-slate-900 shadow-md border border-slate-200' : 'text-slate-400 hover:text-slate-600'}`}
+                     >
+                       Vendeur
+                     </button>
+                     <button 
+                       type="button"
+                       onClick={() => setForm({...form, role: 'admin'})}
+                       className={`py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${form.role === 'admin' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20' : 'text-slate-400 hover:text-slate-600'}`}
+                     >
+                       Admin
+                     </button>
+                  </div>
                 </div>
               </div>
 
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full bg-[#1A1A1A] text-white py-6 border-4 border-[#1A1A1A] shadow-[10px_10px_0px_#FF5F1F] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all flex items-center justify-center gap-4 active:scale-95"
+                className="premium-btn-primary w-full py-5 group"
               >
-                <UserPlus size={24} />
-                <span className="text-xs font-black uppercase tracking-[0.4em]">Créer l'accès</span>
+                <span>Activer l'Accès</span>
+                <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
               </button>
             </form>
           </div>
         </div>
 
-        {/* LISTE (Droite) */}
-        <div className="lg:col-span-7 space-y-10">
-          <div className="flex items-center gap-4">
-             <h2 className="text-xl font-black uppercase tracking-[0.4em] text-[#1A1A1A] shrink-0">Collaborateurs</h2>
-             <div className="h-1.5 flex-1 bg-[#1A1A1A]"></div>
-          </div>
+        {/* Users List Column */}
+        <div className="xl:col-span-8 space-y-8">
+           <div className="flex items-center justify-between px-2">
+              <h2 className="text-[11px] font-black uppercase tracking-[0.25em] text-slate-400 flex items-center gap-2">
+                <Users size={16} /> Liste des Collaborateurs Active
+              </h2>
+              <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-4 py-1.5 rounded-full border border-slate-200">
+                {users.length} Opérateurs enregistrés
+              </span>
+           </div>
 
-          <div className="bg-white border-4 border-[#1A1A1A] shadow-[20px_20px_0px_#1A1A1A] overflow-hidden flex flex-col max-h-[80vh]">
-            <div className="overflow-y-auto custom-scrollbar">
-              <table className="w-full text-left border-collapse">
-                <thead className="sticky top-0 z-20 bg-[#1A1A1A] text-white">
-                  <tr>
-                    <th className="py-6 px-8 text-[10px] font-black uppercase tracking-[0.3em]">Agent</th>
-                    <th className="py-6 px-8 text-[10px] font-black uppercase tracking-[0.3em] text-center">Habilitation</th>
-                    <th className="py-6 px-8 text-[10px] font-black uppercase tracking-[0.3em] text-center">État</th>
-                    <th className="py-6 px-8 text-[10px] font-black uppercase tracking-[0.3em] text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y-4 divide-[#1A1A1A]/10">
-                  {users.length === 0 ? (
-                    <tr>
-                      <td colSpan={4} className="py-20 text-center opacity-30 font-black uppercase tracking-widest text-xs">
-                        Aucun collaborateur enregistré
-                      </td>
-                    </tr>
-                  ) : (
-                    users.map(u => (
-                      <tr key={u.id} className={`group hover:bg-[#FDFCF0] transition-colors ${u.active === 0 ? 'opacity-40 grayscale' : ''}`}>
-                        <td className="py-6 px-8">
-                          <div className="flex items-center gap-4">
-                             <div className="w-12 h-12 bg-[#1A1A1A] text-white border-2 border-[#1A1A1A] flex items-center justify-center italic font-black shadow-[4px_4px_0px_#FF5F1F]">
-                                {u.name.charAt(0).toUpperCase()}
-                             </div>
-                             <div>
-                                <div className="text-sm font-black text-[#1A1A1A] uppercase tracking-tighter leading-tight">{u.name}</div>
-                                <div className="text-[10px] font-mono text-[#1A1A1A]/40">ID: {u.login}</div>
-                             </div>
+           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+             {users.length === 0 ? (
+               <div className="col-span-full py-32 bg-white rounded-[3.5rem] border border-dashed border-slate-200 flex flex-col items-center justify-center text-center opacity-30">
+                  <Users size={48} className="mb-4" />
+                  <p className="font-black uppercase tracking-widest text-xs">Aucun agent configuré</p>
+               </div>
+             ) : (
+               users.map(u => (
+                 <div 
+                   key={u.id} 
+                   className={`p-8 bg-white border border-slate-100 rounded-[3rem] shadow-sm flex flex-col group transition-all duration-500 hover:shadow-2xl hover:shadow-indigo-600/5 hover:-translate-y-1 relative overflow-hidden ${u.active === 0 ? 'opacity-50 grayscale contrast-75' : ''}`}
+                 >
+                    {/* Header: Identity & Status */}
+                    <div className="flex items-start justify-between mb-8">
+                       <div className="flex items-center gap-4">
+                          <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-black text-xl italic shadow-lg ${u.role === 'admin' ? 'bg-gradient-to-br from-slate-800 to-slate-900 text-white' : 'bg-slate-100 text-slate-400'}`}>
+                             {u.name.charAt(0).toUpperCase()}
                           </div>
-                        </td>
-                        <td className="py-6 px-8 text-center">
-                          <span className={`px-3 py-1 border-2 border-[#1A1A1A] text-[9px] font-black uppercase tracking-widest ${u.role === 'admin' ? 'bg-[#FF5F1F] text-white' : 'bg-[#1A1A1A] text-white'}`}>
-                            {u.role}
-                          </span>
-                        </td>
-                        <td className="py-6 px-8 text-center">
-                          <div className="flex flex-col items-center gap-1">
-                             <div className={`w-2 h-2 rounded-full ${u.active ? 'bg-emerald-500 animate-pulse' : 'bg-red-600'}`}></div>
-                             <span className="text-[8px] font-black uppercase tracking-tighter">{u.active ? 'Actif' : 'Révoqué'}</span>
+                          <div>
+                             <h3 className="font-black text-slate-900 tracking-tight leading-none mb-1.5 uppercase italic">{u.name}</h3>
+                             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest font-mono">ID: {u.login}</p>
                           </div>
-                        </td>
-                        <td className="py-6 px-8 text-right">
+                       </div>
+                       
+                       <div className="flex flex-col items-center gap-1.5">
+                          <div className={`w-2.5 h-2.5 rounded-full ${u.active ? 'bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.5)] animate-pulse' : 'bg-rose-500'}`}></div>
+                          <span className="text-[8px] font-black uppercase text-slate-400">{u.active ? 'En Ligne' : 'Bloqué'}</span>
+                       </div>
+                    </div>
+
+                    {/* Role & Privileges */}
+                    <div className="flex-1 space-y-6">
+                       <div className="flex items-center justify-between px-2">
+                          <div className="flex items-center gap-2">
+                             <ShieldCheck size={14} className={u.role === 'admin' ? "text-indigo-600" : "text-slate-400"} />
+                             <span className={`text-[10px] font-black uppercase tracking-widest ${u.role === 'admin' ? "text-indigo-600" : "text-slate-500"}`}>
+                               Habilitation: {u.role === 'admin' ? "Full Administrator" : "Limited Seller Account"}
+                             </span>
+                          </div>
+                       </div>
+                       
+                       <div className="h-px bg-slate-50 w-full"></div>
+                       
+                       {/* Footer: Actions */}
+                       <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                             <div className="p-2 bg-slate-50 rounded-lg text-slate-400 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-all">
+                                <Activity size={14} />
+                             </div>
+                             <span className="text-[9px] font-bold text-slate-400 uppercase">Activité tracée</span>
+                          </div>
+                          
                           {u.active === 1 && u.login !== 'admin' && (
                             <button 
                               onClick={() => handleDeactivate(u.id)}
-                              className="p-3 bg-white border-2 border-[#1A1A1A] text-red-600 hover:bg-red-600 hover:text-white transition-all shadow-[3px_3px_0px_#1A1A1A] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
+                              className="p-3 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-all opacity-0 group-hover:opacity-100"
+                              title="Révoquer l'accès"
                             >
-                              <UserX size={16} />
+                              <UserX size={18} />
                             </button>
                           )}
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-          
-          <div className="p-8 bg-[#1A1A1A] text-white border-4 border-[#1A1A1A] flex items-center gap-6">
-             <ShieldCheck size={32} className="text-[#FF5F1F]" />
-             <div>
-                <div className="text-xs font-black uppercase tracking-[0.3em]">Protection Active</div>
-                <p className="text-[9px] text-white/40 uppercase tracking-[0.2em] mt-1 italic">Tous les accès sont tracés dans le journal de sécurité.</p>
-             </div>
-          </div>
+                       </div>
+                    </div>
+                 </div>
+               ))
+             )}
+           </div>
+           
+           {/* System Information Box */}
+           <div className="p-8 bg-slate-900 rounded-[3rem] shadow-2xl shadow-indigo-600/10 flex items-center gap-8 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 blur-3xl -mr-16 -mt-16"></div>
+              <div className="p-4 bg-white/5 rounded-[2rem] border border-white/5 relative z-10">
+                 <Shield className="text-indigo-400" size={32} />
+              </div>
+              <div className="relative z-10">
+                 <h4 className="text-white font-black text-xs uppercase tracking-[0.2em] mb-1 italic">Vérification d'accès cryptographique</h4>
+                 <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest leading-relaxed">
+                   Tous les mots de passe sont hachés via Argon2ID avant stockage local. <br />
+                   La révocation prend effet instantanément sur toutes les sessions actives.
+                 </p>
+              </div>
+           </div>
         </div>
       </div>
     </div>
