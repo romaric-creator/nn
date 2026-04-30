@@ -14,7 +14,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "start-electron": "electron ./src/main/main.cjs",
-    "dist": "npm run build && electron-builder"
+    "dist": "npm run build && electron-builder",
+    "build:win": "npm run build && electron-builder --win"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
