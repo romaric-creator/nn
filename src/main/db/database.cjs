@@ -357,7 +357,33 @@ const initDb = (databaseInstance, schemaFilePath) => {
             databaseInstance.run('UPDATE users SET hash = ? WHERE login = "admin"', [hash]);
           }
           console.log("Système d'accès synchronisé : admin / admin");
-          resolve(databaseInstance);
+
+          // Initialiser les données de base si la table products est vide (première installation)
+          databaseInstance.get("SELECT COUNT(*) as count FROM products", (errCount, rowCount) => {
+            if (!errCount && rowCount && rowCount.count === 0) {
+              const seedPath = app
+                ? path.join(app.isPackaged ? process.resourcesPath : __dirname + "../../../", "seed.sql")
+                : path.join(__dirname, "../../../seed.sql");
+                
+              if (fs.existsSync(seedPath)) {
+                const seedContent = fs.readFileSync(seedPath, "utf-8");
+                databaseInstance.exec(seedContent, (errSeed) => {
+                  if (errSeed) {
+                    console.error("Erreur lors de l'exécution du seed:", errSeed.message);
+                  } else {
+                    console.log("Données de base (seed) importées avec succès.");
+                  }
+                  resolve(databaseInstance);
+                });
+              } else {
+                console.warn("Fichier seed.sql introuvable, initialisation des données ignorée.", seedPath);
+                resolve(databaseInstance);
+              }
+            } else {
+              // La base de données contient déjà des produits ou erreur, on ne fait rien
+              resolve(databaseInstance);
+            }
+          });
         });
       }
     });

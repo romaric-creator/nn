@@ -11,6 +11,10 @@
     {
       "from": "src/main/db/schema.sql",
       "to": "schema.sql"
+    },
+    {
+      "from": "seed.sql",
+      "to": "seed.sql"
     }
   ],
   "win": {
