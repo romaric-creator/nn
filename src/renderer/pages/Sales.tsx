@@ -115,9 +115,9 @@ export default function Sales() {
         {
           product_id: product.id,
           quantity: 1,
-          price: product.sale_price,
-          original_price: product.sale_price,
-          selling_price: product.sale_price,
+          price: product.sale_price ?? 0,
+          original_price: product.sale_price ?? 0,
+          selling_price: product.sale_price ?? 0,
           model: product.model,
         },
       ]);
@@ -230,8 +230,8 @@ export default function Sales() {
 
   const filteredProducts = products.filter(
     (p) => {
-      const matchesSearch = p.model.toLowerCase().includes(search.toLowerCase()) ||
-                            p.brand.toLowerCase().includes(search.toLowerCase());
+      const matchesSearch = (p.model || '').toLowerCase().includes(search.toLowerCase()) ||
+                            (p.brand || '').toLowerCase().includes(search.toLowerCase());
       const matchesCategory = selectedCategory === "Toutes" || 
                               p.category?.trim().toLowerCase() === selectedCategory.trim().toLowerCase();
       return matchesSearch && matchesCategory;
@@ -241,20 +241,20 @@ export default function Sales() {
   return (
     <div className="flex flex-col h-[calc(100vh-2rem)] animate-in fade-in duration-700">
       {/* Top Bar Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
+          <h1 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
              <div className="p-2.5 bg-indigo-600 rounded-xl shadow-lg shadow-indigo-600/20 rotate-3">
                <ShoppingCart className="text-white" size={24} />
              </div>
              Point de Vente
           </h1>
-          <p className="text-slate-500 font-medium mt-1 ml-14">Gérez vos transactions avec fluidité</p>
+          <p className="text-slate-500 font-medium mt-1 ml-14 text-sm hidden sm:block">Gérez vos transactions avec fluidité</p>
         </div>
 
         <div className="flex items-center gap-4">
            {/* Global Search */}
-           <div className="relative group w-80">
+           <div className="relative group w-48 sm:w-64 max-w-full">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors" size={18} />
               <input
                 type="text"
@@ -309,8 +309,8 @@ export default function Sales() {
               <button
                 key={p.id}
                 onClick={() => addToCart(p)}
-                disabled={p.stock <= 0}
-                className="group flex flex-col items-start p-6 bg-white border border-slate-100 rounded-[2rem] shadow-sm hover:shadow-xl hover:shadow-indigo-500/5 hover:-translate-y-1 transition-all duration-300 disabled:opacity-50 disabled:grayscale relative overflow-hidden min-h-[180px]"
+                disabled={p.stock <= 0 || p.sale_price == null}
+                className="group flex flex-col items-start p-4 md:p-6 bg-white border border-slate-100 rounded-[1.5rem] shadow-sm hover:shadow-xl hover:shadow-indigo-500/5 hover:-translate-y-1 transition-all duration-300 disabled:opacity-50 disabled:grayscale relative overflow-hidden min-h-[160px]"
               >
                 {/* Stock Tag */}
                 <div className={`absolute top-4 right-4 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${
@@ -334,7 +334,7 @@ export default function Sales() {
                   
                   <div className="flex items-center justify-between mt-auto pt-4 border-t border-slate-50 w-full">
                     <span className="text-xl font-black text-slate-900 tracking-tight">
-                      {p.sale_price.toLocaleString()} <span className="text-xs text-slate-400 ml-0.5">CFA</span>
+                      {p.sale_price != null ? p.sale_price.toLocaleString() : <span className="text-sm text-slate-400 italic">Prix non défini</span>} <span className="text-xs text-slate-400 ml-0.5">{p.sale_price != null ? 'CFA' : ''}</span>
                     </span>
                     <div className="p-2 bg-indigo-600 rounded-xl text-white shadow-lg shadow-indigo-600/20 scale-90 group-hover:scale-100 transition-transform">
                       <Plus size={18} />
@@ -356,10 +356,10 @@ export default function Sales() {
         </div>
 
         {/* Right Section: Cart / Summary */}
-        <div className="w-[420px] flex flex-col gap-6 relative">
-           <div className="flex-1 glass-card rounded-[2.5rem] flex flex-col overflow-hidden border-slate-200/60 shadow-2xl shadow-slate-200/50">
+        <div className="w-[320px] md:w-[360px] lg:w-[420px] flex flex-col gap-6 relative shrink-0">
+           <div className="flex-1 glass-card rounded-[1.5rem] flex flex-col overflow-hidden border-slate-200/60 shadow-2xl shadow-slate-200/50">
               {/* Cart Header */}
-              <div className="p-8 bg-slate-900 text-white rounded-b-[3rem] relative overflow-hidden">
+              <div className="p-6 bg-slate-900 text-white rounded-b-[2rem] relative overflow-hidden">
                 {/* Background decoration */}
                 <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/20 blur-3xl -mr-10 -mt-10"></div>
                 <div className="absolute bottom-0 left-0 w-24 h-24 bg-rose-500/10 blur-2xl -ml-10 -mb-10"></div>
@@ -451,7 +451,7 @@ export default function Sales() {
               </div>
 
               {/* Cart Footer / Checkout */}
-              <div className="p-8 bg-slate-50 border-t border-slate-200">
+              <div className="p-6 bg-slate-50 border-t border-slate-200">
                  {/* Customer Selector */}
                  <div className="relative mb-6" ref={dropdownRef}>
                    <div 

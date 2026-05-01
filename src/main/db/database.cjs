@@ -213,6 +213,29 @@ const initDb = (databaseInstance, schemaFilePath) => {
           }
         });
 
+        // Migration : ajouter colonnes manquantes à audit_logs
+        databaseInstance.all("PRAGMA table_info(audit_logs)", (alErr, alCols) => {
+          if (!alErr && alCols) {
+            const cols = alCols.map(c => c.name);
+            if (!cols.includes("entity")) {
+              databaseInstance.run("ALTER TABLE audit_logs ADD COLUMN entity TEXT");
+              console.log("Migration : Colonne entity ajoutée à audit_logs.");
+            }
+            if (!cols.includes("entity_id")) {
+              databaseInstance.run("ALTER TABLE audit_logs ADD COLUMN entity_id INTEGER");
+              console.log("Migration : Colonne entity_id ajoutée à audit_logs.");
+            }
+            if (!cols.includes("old_value")) {
+              databaseInstance.run("ALTER TABLE audit_logs ADD COLUMN old_value TEXT");
+              console.log("Migration : Colonne old_value ajoutée à audit_logs.");
+            }
+            if (!cols.includes("new_value")) {
+              databaseInstance.run("ALTER TABLE audit_logs ADD COLUMN new_value TEXT");
+              console.log("Migration : Colonne new_value ajoutée à audit_logs.");
+            }
+          }
+        });
+
         // Migration : ajouter colonne commission_percent à users si manquante
         databaseInstance.all("PRAGMA table_info(users)", (uErr, userCols) => {
           if (!uErr && userCols) {

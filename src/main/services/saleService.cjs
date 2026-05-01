@@ -1,6 +1,7 @@
 const { db } = require("../db/database.cjs");
-const logger = require("./loggingService.cjs"); // Importation du logger
+const logger = require("./loggingService.cjs");
 const InvoiceService = require("./invoiceService.cjs");
+const AuditService = require("./auditService.cjs");
 
 const SaleService = {
   /**
@@ -101,6 +102,13 @@ const SaleService = {
             };
 
             const html = await new Promise((res, rej) => InvoiceService.generateInvoiceHTML(invoiceDataForHtml, (err, h) => err ? rej(err) : res(h)));
+
+            // Audit : enregistrer la vente
+            AuditService.logAudit(
+              "sales", saleId, "checkout", sale.user_id,
+              null,
+              JSON.stringify({ total, items: items.map(i => ({ product_id: i.product_id, qty: i.quantity, price: i.selling_price || i.price })) })
+            );
 
             logger.info("Checkout réussi", { saleId, invoiceId });
             resolve({ success: true, saleId, invoiceId, html });
@@ -383,6 +391,8 @@ const SaleService = {
                             saleId,
                             restoredItems: items.length,
                           });
+                          // Audit : enregistrer l'annulation
+                          AuditService.logAudit("sales", saleId, "cancel", null, JSON.stringify({ status: 'completed' }), JSON.stringify({ status: 'cancelled' }));
                           callback(null);
                         });
                       },

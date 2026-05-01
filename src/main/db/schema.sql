@@ -133,7 +133,11 @@ CREATE TABLE IF NOT EXISTS product_units (
 CREATE TABLE IF NOT EXISTS audit_logs (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   user_id INTEGER,
-  action TEXT,
+  entity TEXT,           -- Table concernée (ex: 'products', 'sales')
+  entity_id INTEGER,     -- ID de l'enregistrement concerné
+  action TEXT,           -- Type d'action (ex: 'update', 'delete', 'sale')
+  old_value TEXT,        -- Ancienne valeur (JSON)
+  new_value TEXT,        -- Nouvelle valeur (JSON)
   timestamp TEXT DEFAULT (datetime('now')),
   FOREIGN KEY(user_id) REFERENCES users(id)
 );
