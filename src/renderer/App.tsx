@@ -89,7 +89,7 @@ export default function App() {
           
           <Sidebar onLogout={handleLogout} user={user} />
           
-          <main className="flex-1 overflow-y-auto custom-scrollbar relative z-10 p-6 md:p-10 lg:p-12">
+          <main className="flex-1 overflow-y-auto custom-scrollbar relative z-10 p-4 md:p-6 lg:p-8">
             <div className="max-w-[1600px] mx-auto">
               {/* Page Transition Wrapper can be added here if framer-motion was available */}
               <div className="min-h-full">

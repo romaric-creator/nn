@@ -131,7 +131,7 @@ export default function Reports() {
   if (loading && detailedReport.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] animate-pulse">
-        <div className="p-10 bg-white rounded-[3rem] shadow-xl">
+        <div className="p-6 bg-white rounded-[1.5rem] shadow-xl">
            <Activity size={48} className="text-indigo-200 mb-6 mx-auto" />
            <p className="text-slate-400 font-bold tracking-tight italic">Compilation des données analytiques...</p>
         </div>
@@ -140,15 +140,15 @@ export default function Reports() {
   }
 
   return (
-    <div className="animate-in fade-in duration-700 space-y-12 pb-20">
+    <div className="animate-in fade-in duration-700 space-y-6 pb-12">
       {/* Header Section */}
-      <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-10">
+      <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-4">
         <div>
            <div className="flex items-center gap-3 mb-4">
               <div className="p-2.5 bg-indigo-600 rounded-xl shadow-lg shadow-indigo-600/20 rotate-3">
                  <BarChart3 className="text-white" size={24} />
               </div>
-              <h1 className="text-3xl font-black text-slate-900 tracking-tight italic">Analyses & Rapports</h1>
+              <h1 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight italic">Analyses & Rapports</h1>
            </div>
            <p className="text-slate-500 font-medium ml-1">Surveillez vos indicateurs de performance en temps réel</p>
         </div>
@@ -188,8 +188,8 @@ export default function Reports() {
       </div>
 
       {/* Primary KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-        <div className="glass-card p-8 rounded-[3rem] border-slate-200/60 transition-all hover:shadow-2xl hover:shadow-indigo-500/5 group relative overflow-hidden">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="glass-card p-6 rounded-[1.5rem] border-slate-200/60 transition-all hover:shadow-2xl hover:shadow-indigo-500/5 group relative overflow-hidden">
           <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-500/5 blur-3xl -mr-12 -mt-12"></div>
           <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 italic">Volume Période</p>
           <div className="flex items-end justify-between">
@@ -202,7 +202,7 @@ export default function Reports() {
           </div>
         </div>
 
-        <div className="glass-card p-8 rounded-[3rem] border-slate-200/60 transition-all hover:shadow-2xl hover:shadow-emerald-500/5 group">
+        <div className="glass-card p-6 rounded-[1.5rem] border-slate-200/60 transition-all hover:shadow-2xl hover:shadow-emerald-500/5 group">
           <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 italic">Ventes ce Mois</p>
           <div className="flex items-end justify-between">
             <h4 className="text-2xl font-black text-slate-900 tracking-tighter leading-none">
@@ -214,7 +214,7 @@ export default function Reports() {
           </div>
         </div>
 
-        <div className="glass-card p-8 rounded-[3rem] border-slate-200/60 transition-all hover:shadow-2xl hover:shadow-amber-500/5 group">
+        <div className="glass-card p-6 rounded-[1.5rem] border-slate-200/60 transition-all hover:shadow-2xl hover:shadow-amber-500/5 group">
           <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 italic">Performance Semaine</p>
           <div className="flex items-end justify-between">
             <h4 className="text-2xl font-black text-slate-900 tracking-tighter leading-none">
@@ -226,7 +226,7 @@ export default function Reports() {
           </div>
         </div>
 
-        <div className="p-8 bg-slate-900 rounded-[3rem] shadow-2xl shadow-indigo-600/10 relative overflow-hidden group">
+        <div className="p-6 bg-slate-900 rounded-[1.5rem] shadow-2xl shadow-indigo-600/10 relative overflow-hidden group">
           <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/20 blur-3xl -mr-16 -mt-16"></div>
           <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-2 italic">Chiffre d'Affaire Relatif</p>
           <div className="flex items-end justify-between relative z-10">
@@ -240,11 +240,11 @@ export default function Reports() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left Column: Seller Performance & Detailed Journal */}
-        <div className="lg:col-span-8 space-y-12">
+        <div className="lg:col-span-8 space-y-8">
             {/* Seller Performance Table Section */}
-            <div className="bg-white rounded-[3rem] border border-slate-100 shadow-sm overflow-hidden p-8">
+            <div className="bg-white rounded-[1.5rem] border border-slate-100 shadow-sm overflow-hidden p-6">
                <div className="flex items-center justify-between mb-8 px-2">
                   <h3 className="text-[11px] font-black uppercase tracking-[0.25em] text-slate-400 flex items-center gap-2">
                     <Award size={14} className="text-indigo-500" /> Élite des Vendeurs
@@ -303,7 +303,7 @@ export default function Reports() {
                   </span>
                </div>
 
-               <div className="bg-white rounded-[3rem] border border-slate-100 shadow-xl shadow-slate-200/40 overflow-hidden">
+               <div className="bg-white rounded-[1.5rem] border border-slate-100 shadow-xl shadow-slate-200/40 overflow-hidden">
                   <div className="max-h-[600px] overflow-y-auto custom-scrollbar">
                      <table className="w-full text-left border-collapse">
                        <thead className="sticky top-0 z-10 bg-slate-900 text-white">
@@ -370,14 +370,14 @@ export default function Reports() {
         </div>
 
         {/* Right Column: Top Products Leaderboard */}
-        <div className="lg:col-span-4 space-y-8">
+        <div className="lg:col-span-4 space-y-6">
            <div className="flex items-center justify-between px-2">
               <h3 className="text-sm font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
                 <TrendingUp size={16} /> Top Performances
               </h3>
            </div>
 
-           <div className="bg-slate-900 rounded-[3rem] p-8 shadow-2xl shadow-indigo-600/5 relative overflow-hidden">
+           <div className="bg-slate-900 rounded-[1.5rem] p-6 shadow-2xl shadow-indigo-600/5 relative overflow-hidden">
               {/* Background Glow */}
               <div className="absolute bottom-0 right-0 w-48 h-48 bg-indigo-600/20 blur-3xl -mr-20 -mb-20"></div>
               
@@ -425,7 +425,7 @@ export default function Reports() {
            </div>
            
            {/* Secondary Info Card */}
-           <div className="glass-card p-8 rounded-[3rem] border-slate-200/60 shadow-sm relative overflow-hidden group hover:border-indigo-200 transition-all">
+           <div className="glass-card p-6 rounded-[1.5rem] border-slate-200/60 shadow-sm relative overflow-hidden group hover:border-indigo-200 transition-all">
               <div className="flex items-center gap-4 mb-4">
                  <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl group-hover:bg-indigo-600 group-hover:text-white transition-all">
                     <Activity size={20} />

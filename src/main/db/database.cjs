@@ -1,11 +1,12 @@
 const path = require("path");
 const fs = require("fs");
 const sqlite3 = require("sqlite3").verbose();
-const { app } = require("electron");
+const electron = require("electron");
+const app = electron.app || null;
 
-const schemaPath = app.isPackaged
-  ? path.join(process.resourcesPath, "schema.sql")
-  : path.join(__dirname, "schema.sql");
+const schemaPath = app && app.isPackaged
+   ? path.join(process.resourcesPath, "schema.sql")
+   : path.join(__dirname, "schema.sql");
 
 function ensureDbDir(dbFilePath) {
   const dir = path.dirname(dbFilePath);

@@ -57,7 +57,7 @@
   }
   
   .glass-sidebar {
-    @apply bg-slate-900/95 backdrop-blur-xl border-r border-slate-800 text-slate-300;
+    @apply bg-white border-r border-slate-200 text-slate-700 z-50 shadow-xl shadow-slate-200/40;
   }
 
   .premium-btn {

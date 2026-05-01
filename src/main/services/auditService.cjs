@@ -18,7 +18,13 @@ const AuditService = {
         al.old_value,
         al.new_value,
         NULL           AS reason,
-        'audit'        AS log_type
+        'audit'        AS log_type,
+        CASE 
+          WHEN al.entity = 'products' THEN (SELECT model FROM products WHERE id = al.entity_id)
+          WHEN al.entity = 'sales' THEN (SELECT 'Vente #' || id FROM sales WHERE id = al.entity_id)
+          WHEN al.entity = 'customers' THEN (SELECT name FROM customers WHERE id = al.entity_id)
+          ELSE NULL
+        END AS target_name
       FROM audit_logs al
       LEFT JOIN users u ON al.user_id = u.id
 
@@ -34,12 +40,14 @@ const AuditService = {
         END            AS action,
         'stock'        AS entity,
         sm.product_id  AS entity_id,
-        NULL           AS old_value,
-        json_object('quantity', sm.quantity, 'note', IFNULL(sm.note,'')) AS new_value,
+        json_object('stock_before', (SELECT stock FROM products WHERE id = sm.product_id)) AS old_value,
+        json_object('quantity', sm.quantity, 'note', IFNULL(sm.note,''), 'product', p.model, 'brand', p.brand) AS new_value,
         sm.note        AS reason,
-        'stock'        AS log_type
+        'stock'        AS log_type,
+        p.model        AS target_name
       FROM stock_movements sm
       LEFT JOIN users u2 ON sm.user_id = u2.id
+      LEFT JOIN products p ON sm.product_id = p.id
 
       UNION ALL
 
@@ -52,7 +60,8 @@ const AuditService = {
         NULL           AS old_value,
         NULL           AS new_value,
         NULL           AS reason,
-        'user'         AS log_type
+        'user'         AS log_type,
+        u3.name        AS target_name
       FROM user_logs ul
       JOIN users u3 ON ul.user_id = u3.id
 

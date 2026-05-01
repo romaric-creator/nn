@@ -1,7 +1,9 @@
 // src/main/main.cjs
 // Point d'entrée principal Electron (Cameroun, architecture pro)
 
-const { app, BrowserWindow, ipcMain, Menu } = require("electron");
+const electron = require("electron");
+const app = electron.app || null;
+const { BrowserWindow, ipcMain, Menu } = electron;
 const path = require("path");
 const { initDb, db, schemaPath } = require("./db/database.cjs");
 
@@ -19,8 +21,6 @@ function createWindow() {
   if (process.env.NODE_ENV === "development") {
     // En mode développement, charger l'URL du serveur Vite
     win.loadURL("http://localhost:5173");
-    // Ouvrir les outils de développement automatiquement
-    win.webContents.openDevTools();
   } else {
     // En mode production, charger le fichier buildé
     win.loadFile(path.join(__dirname, "../../dist/index.html"));

@@ -268,15 +268,15 @@ export default function Stock() {
   };
 
   return (
-    <div className="space-y-10 pb-20 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="space-y-6 pb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Header Section */}
-      <header className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-8">
+      <header className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-4">
         <div className="space-y-2">
           <div className="flex items-center gap-3">
-             <div className="w-12 h-12 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shadow-lg shadow-indigo-200">
-                <Package size={28} />
+             <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-lg shadow-indigo-200">
+                <Package size={24} />
              </div>
-             <h1 className="text-4xl font-black text-slate-900 tracking-tighter uppercase italic">
+             <h1 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tighter uppercase italic">
                Inventaire
              </h1>
           </div>
@@ -343,15 +343,15 @@ export default function Stock() {
       </header>
 
       {/* Main Content Area */}
-      <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-xl overflow-hidden min-h-[60vh] flex flex-col">
+      <div className="bg-white rounded-[1.5rem] border border-slate-100 shadow-sm overflow-hidden min-h-[60vh] flex flex-col">
         {activeTab === "inventory" ? (
           <>
             {/* Search and Filters Bar */}
-            <div className="p-8 border-b border-slate-50 flex flex-col md:flex-row gap-6 items-center">
+            <div className="p-4 md:p-6 border-b border-slate-50 flex flex-col md:flex-row gap-4 items-center">
               <div className="flex-1 relative group w-full">
                 <Search
-                  className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors"
-                  size={20}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors"
+                  size={18}
                 />
                 <input
                   type="text"
@@ -367,7 +367,7 @@ export default function Stock() {
             </div>
 
             {/* Category Quick Filter */}
-            <div className="px-8 pb-6 flex items-center gap-3 overflow-x-auto custom-scrollbar no-scrollbar">
+            <div className="px-4 md:px-6 pb-4 flex items-center gap-2 overflow-x-auto custom-scrollbar no-scrollbar">
                {["Toutes", ...allCategories].map((cat) => (
                  <button
                     key={cat}
@@ -388,10 +388,10 @@ export default function Stock() {
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="border-b border-slate-50 text-slate-400">
-                    <th className="py-6 px-10 text-[10px] font-black uppercase tracking-[0.3em]">Article & Détails</th>
-                    <th className="py-6 px-10 text-[10px] font-black uppercase tracking-[0.3em] text-center">État</th>
-                    <th className="py-6 px-10 text-[10px] font-black uppercase tracking-[0.3em] text-center">Disponibilité</th>
-                    <th className="py-6 px-10 text-[10px] font-black uppercase tracking-[0.3em] text-right">Pilotage</th>
+                    <th className="py-4 px-6 text-[10px] font-black uppercase tracking-[0.3em]">Article & Détails</th>
+                    <th className="py-4 px-6 text-[10px] font-black uppercase tracking-[0.3em] text-center">État</th>
+                    <th className="py-4 px-6 text-[10px] font-black uppercase tracking-[0.3em] text-center">Disponibilité</th>
+                    <th className="py-4 px-6 text-[10px] font-black uppercase tracking-[0.3em] text-right">Pilotage</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50">
@@ -416,25 +416,25 @@ export default function Stock() {
                   ) : (
                     products.map((p) => (
                       <tr key={p.id} className="group hover:bg-slate-50/50 transition-all duration-300">
-                        <td className="py-7 px-10">
-                          <div className="flex items-center gap-5">
-                             <div className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-white group-hover:text-indigo-600 transition-all border border-transparent group-hover:border-slate-100">
-                                <Box size={22} />
+                        <td className="py-4 px-6">
+                          <div className="flex items-center gap-3">
+                             <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-white group-hover:text-indigo-600 transition-all border border-transparent group-hover:border-slate-100">
+                                <Box size={20} />
                              </div>
                              <div>
-                                <div className="font-black text-lg text-slate-900 tracking-tighter uppercase leading-none mb-1 group-hover:text-indigo-600 transition-colors">
+                                <div className="font-extrabold text-sm text-slate-900 tracking-tight uppercase leading-none mb-1 group-hover:text-indigo-600 transition-colors">
                                   {p.model}
                                 </div>
                                 <div className="flex items-center gap-2">
-                                   <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{p.brand}</span>
+                                   <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{p.brand}</span>
                                    <span className="w-1 h-1 rounded-full bg-slate-300"></span>
-                                   <span className="text-[10px] font-bold text-indigo-500 group-hover:bg-indigo-50 px-1.5 rounded py-0.5 transition-all">{p.category}</span>
+                                   <span className="text-[9px] font-bold text-indigo-500 group-hover:bg-indigo-50 px-1.5 rounded py-0.5 transition-all">{p.category}</span>
                                 </div>
                              </div>
                           </div>
                         </td>
-                        <td className="py-7 px-10 text-center">
-                          <span className={`badge ${
+                        <td className="py-4 px-6 text-center">
+                          <span className={`badge text-[10px] ${
                             p.state === "Neuf" 
                             ? "bg-emerald-50 text-emerald-600 border border-emerald-100" 
                             : "bg-amber-50 text-amber-600 border border-amber-100"
@@ -442,18 +442,18 @@ export default function Stock() {
                             {p.state}
                           </span>
                         </td>
-                        <td className="py-7 px-10 text-center">
+                        <td className="py-4 px-6 text-center">
                            <div className="inline-flex flex-col items-center">
-                              <span className={`text-xl font-black italic tracking-tighter ${
-                                p.stock <= (p.min_stock || 2) ? "text-rose-600 underline decoration-rose-200 decoration-4 underline-offset-4" : "text-slate-900"
+                              <span className={`text-lg font-black italic tracking-tighter ${
+                                p.stock <= (p.min_stock || 2) ? "text-rose-600 underline decoration-rose-200 decoration-2 underline-offset-2" : "text-slate-900"
                               }`}>
                                 {p.stock}
                               </span>
-                              <span className="text-[9px] font-black opacity-30 uppercase tracking-[0.2em] mt-1">Unités</span>
+                              <span className="text-[9px] font-black opacity-30 uppercase tracking-[0.2em]">Unités</span>
                            </div>
                         </td>
-                        <td className="py-7 px-10 text-right">
-                          <div className="flex justify-end items-center gap-2">
+                        <td className="py-4 px-6 text-right">
+                          <div className="flex justify-end items-center gap-1.5">
                             <button
                               onClick={() => {
                                 setSelectedProduct(p);

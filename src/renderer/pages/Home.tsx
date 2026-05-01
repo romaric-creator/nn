@@ -8,13 +8,9 @@ import {
   Box,
   AlertCircle,
   ArrowRight,
-  LayoutDashboard,
   TrendingUp,
   History,
   Activity,
-  ArrowUpRight,
-  Search,
-  Bell,
   Calendar,
 } from "lucide-react";
 
@@ -104,7 +100,7 @@ export default function Home() {
           monthlySalesRes,
           weeklyStatsRes,
           auditRes,
-        ] = await Promise.all([
+        ]: any = await Promise.all([
           window.electronAPI.invoke("stock:getAll"),
           window.electronAPI.invoke("customer:getAll"),
           window.electronAPI.invoke("stock:low"),
@@ -139,22 +135,10 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="space-y-10 pb-20 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      {/* Top Navigation / Search area */}
-      <div className="flex items-center justify-between gap-6">
-        <div className="relative flex-1 max-w-md group">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors" size={18} />
-          <input 
-            type="text" 
-            placeholder="Rechercher un produit, une facture..." 
-            className="w-full pl-12 pr-4 py-3.5 bg-white border-none rounded-2xl shadow-sm focus:ring-4 focus:ring-indigo-500/10 text-sm font-medium placeholder:text-slate-400 transition-all"
-          />
-        </div>
+    <div className="space-y-6 pb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      {/* Top Navigation / Date Area */}
+      <div className="flex items-center justify-end gap-4">
         <div className="flex items-center gap-3">
-          <button className="p-3.5 bg-white rounded-2xl shadow-sm hover:bg-slate-50 transition-colors relative">
-            <Bell size={20} className="text-slate-600" />
-            <span className="absolute top-3 right-3 w-2.5 h-2.5 bg-rose-500 border-2 border-white rounded-full"></span>
-          </button>
           <div className="hidden md:flex items-center gap-3 bg-white px-5 py-3 rounded-2xl shadow-sm border border-slate-100">
             <Calendar size={18} className="text-indigo-600" />
             <span className="text-sm font-bold text-slate-700">
@@ -169,19 +153,19 @@ export default function Home() {
       </div>
 
       {/* Hero Welcome Section */}
-      <section className="relative overflow-hidden rounded-[2.5rem] bg-slate-900 p-10 md:p-14 text-white shadow-2xl">
-        <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-indigo-500/20 to-transparent pointer-events-none"></div>
-        <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-indigo-600/30 blur-[100px] rounded-full"></div>
+      <section className="relative overflow-hidden rounded-[2rem] bg-white border border-slate-200 p-6 md:p-10 text-slate-900 shadow-xl shadow-slate-200/40">
+        <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-indigo-50 to-transparent pointer-events-none"></div>
+        <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-indigo-500/10 blur-[100px] rounded-full"></div>
         
         <div className="relative z-10 max-w-2xl">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/10 mb-6">
-            <Activity size={14} className="text-indigo-400" />
-            <span className="text-[10px] font-black uppercase tracking-widest">Système Opérationnel</span>
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-50 border border-indigo-100 mb-6 font-bold text-indigo-600">
+            <Activity size={14} className="text-indigo-600" />
+            <span className="text-[10px] uppercase tracking-widest">Système Opérationnel</span>
           </div>
-          <h1 className="text-4xl md:text-5xl font-black tracking-tighter mb-4">
-            Bonjour, <span className="text-indigo-400">{user.name?.split(' ')[0] || "Admin"}</span> 👋
+          <h1 className="text-4xl md:text-5xl font-black tracking-tighter mb-4 text-slate-900">
+            Bonjour, <span className="text-indigo-600">{user.name?.split(' ')[0] || "Admin"}</span> 👋
           </h1>
-          <p className="text-slate-400 text-lg font-medium leading-relaxed mb-10 max-w-lg">
+          <p className="text-slate-500 text-lg font-medium leading-relaxed mb-10 max-w-lg">
             Bienvenue sur votre espace de gestion. Suivez vos performances en temps réel et gérez votre stock en toute simplicité.
           </p>
           
@@ -196,7 +180,7 @@ export default function Home() {
             </button>
             <button
               onClick={() => navigate("/stock")}
-              className="premium-btn bg-white/10 backdrop-blur-md border border-white/10 hover:bg-white/20 text-white py-4 px-8 rounded-2xl transition-all"
+              className="premium-btn bg-slate-50 border border-slate-200 hover:bg-slate-100 hover:border-slate-300 text-slate-700 py-4 px-8 rounded-2xl transition-all"
             >
               <Box size={20} />
               <span>Consulter l'Inventaire</span>
@@ -206,16 +190,16 @@ export default function Home() {
         
         {/* Animated Visual Component */}
         <div className="absolute right-14 bottom-14 hidden lg:block animate-float">
-           <div className="w-56 h-56 rounded-[3rem] border border-white/10 bg-white/5 backdrop-blur-xl p-8 flex flex-col justify-between">
+           <div className="w-56 h-56 rounded-[3rem] border border-slate-200 bg-white shadow-xl shadow-slate-200/50 p-8 flex flex-col justify-between">
               <div className="flex justify-between items-start">
-                  <div className="w-12 h-12 rounded-2xl bg-indigo-500/20 flex items-center justify-center">
-                    <TrendingUp className="text-indigo-400" size={24} />
+                  <div className="w-12 h-12 rounded-2xl bg-indigo-50 flex items-center justify-center">
+                    <TrendingUp className="text-indigo-600" size={24} />
                   </div>
-                  <span className="text-[10px] font-black text-emerald-400 bg-emerald-400/10 px-2 py-1 rounded-lg">+14.2%</span>
+                  <span className="text-[10px] font-black text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg">+14.2%</span>
               </div>
               <div>
-                 <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-1">Croissance</p>
-                 <h4 className="text-2xl font-black">Performance</h4>
+                 <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-1">Croissance</p>
+                 <h4 className="text-2xl font-black text-slate-900">Performance</h4>
               </div>
            </div>
         </div>
@@ -249,12 +233,12 @@ export default function Home() {
         />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Main Content Area */}
-        <div className="lg:col-span-8 space-y-10">
+        <div className="lg:col-span-8 space-y-6">
           {/* Weekly Performance Graph */}
-          <div className="bg-white rounded-[2.5rem] p-10 border border-slate-100 shadow-sm relative overflow-hidden group">
-            <div className="flex items-center justify-between mb-12">
+          <div className="bg-white rounded-[1.5rem] p-6 border border-slate-100 shadow-sm relative overflow-hidden group">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
               <div>
                 <div className="flex items-center gap-3 mb-2">
                    <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
@@ -283,7 +267,7 @@ export default function Home() {
                         style={{ height: `${Math.max(height, 8)}%` }}
                         className="w-full bg-indigo-100 rounded-2xl group-hover/bar:bg-indigo-600 transition-all duration-500 relative flex items-start justify-center pt-2"
                       >
-                        <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[11px] font-bold py-2 px-3 rounded-xl opacity-0 group-hover/bar:opacity-100 group-hover/bar:-translate-y-1 transition-all whitespace-nowrap shadow-xl z-20 pointer-events-none">
+                        <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-white text-slate-900 border border-slate-200 text-[11px] font-bold py-2 px-3 rounded-xl opacity-0 group-hover/bar:opacity-100 group-hover/bar:-translate-y-1 transition-all whitespace-nowrap shadow-lg z-20 pointer-events-none">
                           {Number(day.daily_total).toLocaleString()} CFA
                         </div>
                         <div className="w-1 h-3/4 bg-white/20 rounded-full"></div>
@@ -317,10 +301,10 @@ export default function Home() {
         </div>
 
         {/* Sidebar Style Right Column */}
-        <div className="lg:col-span-4 space-y-10">
+        <div className="lg:col-span-4 space-y-6">
           {/* Critical Stock Alerts */}
-          <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden group">
-            <div className="p-8 bg-rose-50/50 border-b border-rose-50 flex items-center justify-between">
+          <div className="bg-white rounded-[1.5rem] border border-slate-100 shadow-sm overflow-hidden group">
+            <div className="p-6 bg-rose-50/50 border-b border-rose-50 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <AlertCircle size={24} className="text-rose-600" />
                 <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest">Alertes Stocks</h3>
@@ -337,10 +321,10 @@ export default function Home() {
                 </div>
               ) : (
                 lowStockProducts.map((product) => (
-                  <div key={product.id} className="p-6 flex items-center justify-between hover:bg-slate-50 transition-all duration-300">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 group-hover:bg-white transition-colors">
-                        <Box size={20} />
+                  <div key={product.id} className="p-4 flex items-center justify-between hover:bg-slate-50 transition-all duration-300">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 group-hover:bg-white transition-colors">
+                        <Box size={18} />
                       </div>
                       <div>
                         <p className="text-sm font-black text-slate-900 group-hover:text-indigo-600 transition-colors uppercase tracking-tighter leading-tight">
@@ -371,8 +355,8 @@ export default function Home() {
 
           {/* Recent Audit Logs */}
           {isAdmin && (
-            <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden">
-              <div className="p-8 border-b border-slate-100 flex items-center justify-between">
+            <div className="bg-white rounded-[1.5rem] border border-slate-100 shadow-sm overflow-hidden">
+              <div className="p-6 border-b border-slate-100 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <History size={24} className="text-indigo-600" />
                   <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest">Activités</h3>
@@ -384,24 +368,24 @@ export default function Home() {
                   Historique
                 </button>
               </div>
-              <div className="p-8 space-y-6">
+              <div className="p-6 space-y-4">
                 {auditLogs.length === 0 ? (
                   <p className="text-[10px] font-bold text-slate-300 uppercase tracking-[0.2em] text-center py-4 italic">Aucun mouvement détecté</p>
                 ) : (
-                  auditLogs.map((log) => (
+                  auditLogs.slice(0, 5).map((log) => (
                     <div key={log.id} className="flex gap-4 group">
-                      <div className="relative pt-1">
+                      <div className="relative pt-1 flex-shrink-0">
                         <div className="w-2.5 h-2.5 rounded-full bg-indigo-500 ring-4 ring-indigo-50 group-hover:scale-125 transition-transform"></div>
                         <div className="absolute top-6 left-1.25 w-[1px] h-full bg-slate-100 last:hidden"></div>
                       </div>
-                      <div className="pb-2">
-                        <p className="text-slate-900 text-xs font-black uppercase leading-tight group-hover:text-indigo-600 transition-colors">
+                      <div className="pb-1">
+                        <p className="text-slate-900 text-[11px] font-black uppercase leading-tight group-hover:text-indigo-600 transition-colors line-clamp-1">
                           {log.action}
                         </p>
-                        <div className="flex items-center gap-2 mt-1.5 font-bold uppercase tracking-widest text-[9px]">
+                        <div className="flex items-center gap-2 mt-1 font-bold uppercase tracking-widest text-[9px]">
                            <span className="text-slate-500">{log.user_name}</span>
                            <span className="text-slate-300">•</span>
-                           <span className="text-slate-400">{log.timestamp?.slice(11, 16)}</span>
+                           <span className="text-slate-400 truncate max-w-[120px]" title={log.timestamp}>{log.timestamp?.slice(11, 16)}</span>
                         </div>
                       </div>
                     </div>

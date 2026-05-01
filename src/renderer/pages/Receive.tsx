@@ -122,9 +122,9 @@ export default function Receive() {
   };
 
   return (
-    <div className="animate-in fade-in duration-700 space-y-12 pb-20">
+    <div className="animate-in fade-in duration-700 space-y-6 pb-12">
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
            <div className="flex items-center gap-3 mb-4">
               <div className="p-2.5 bg-indigo-600 rounded-xl shadow-lg shadow-indigo-600/20 rotate-3">
@@ -146,7 +146,7 @@ export default function Receive() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-12">
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
         {/* CSV Import Column */}
         <div className="xl:col-span-12 lg:xl:col-span-7 space-y-8">
             <div className="flex items-center gap-2 px-2">
@@ -154,10 +154,10 @@ export default function Receive() {
                <h2 className="text-[11px] font-black uppercase tracking-[0.30em] text-slate-400">Assistant d'Importation Massive</h2>
             </div>
 
-            <div className="glass-card p-10 rounded-[3rem] border-slate-200/60 shadow-xl shadow-slate-200/40 space-y-10 relative overflow-hidden">
+            <div className="glass-card p-6 rounded-[1.5rem] border-slate-200/60 shadow-xl shadow-slate-200/40 space-y-6 relative overflow-hidden">
                <div className="absolute top-0 right-0 w-48 h-48 bg-indigo-500/5 blur-3xl -mr-20 -mt-20"></div>
                
-               <div className="bg-slate-50 border border-slate-100 rounded-[2.5rem] p-8 flex flex-col items-center justify-center text-center group border-dashed hover:border-indigo-200 hover:bg-indigo-50/10 transition-all cursor-pointer relative overflow-hidden"
+               <div className="bg-slate-50 border border-slate-100 rounded-[1.5rem] p-6 flex flex-col items-center justify-center text-center group border-dashed hover:border-indigo-200 hover:bg-indigo-50/10 transition-all cursor-pointer relative overflow-hidden"
                  onClick={() => fileInputRef.current?.click()}
                >
                   {/* Internal Glow on Hover */}
@@ -197,7 +197,7 @@ export default function Receive() {
                </div>
 
                {/* Syntax Reminder */}
-               <div className="p-8 bg-slate-900 rounded-[2.5rem] shadow-2xl shadow-indigo-600/10 flex flex-col md:flex-row items-center gap-6 border border-white/5 group hover:border-indigo-500/50 transition-all">
+               <div className="p-6 bg-slate-900 rounded-[1.5rem] shadow-2xl shadow-indigo-600/10 flex flex-col md:flex-row items-center gap-6 border border-white/5 group hover:border-indigo-500/50 transition-all">
                   <div className="p-4 bg-white/5 text-indigo-400 rounded-2xl">
                     <FileText size={24} />
                   </div>
@@ -238,7 +238,7 @@ export default function Receive() {
                <h2 className="text-[11px] font-black uppercase tracking-[0.30em] text-slate-400">Maintenance & Intégrité</h2>
             </div>
 
-            <div className="glass-card p-10 rounded-[3rem] border-slate-200/60 shadow-xl shadow-slate-200/40 space-y-10 relative overflow-hidden group">
+            <div className="glass-card p-6 rounded-[1.5rem] border-slate-200/60 shadow-xl shadow-slate-200/40 space-y-8 relative overflow-hidden group">
                <div className="absolute bottom-0 right-0 w-32 h-32 bg-indigo-500/5 blur-3xl -mr-16 -mb-16"></div>
                
                <div className="space-y-6">
@@ -256,7 +256,7 @@ export default function Receive() {
                   <button 
                     onClick={handleBackup}
                     disabled={loading}
-                    className="w-full py-6 bg-slate-900 text-white rounded-[2rem] shadow-xl shadow-slate-900/10 hover:bg-indigo-600 transition-all flex items-center justify-center gap-4 group/btn active:scale-95 disabled:opacity-50"
+                    className="w-full py-4 bg-slate-900 text-white rounded-[1.5rem] shadow-xl shadow-slate-900/10 hover:bg-indigo-600 transition-all flex items-center justify-center gap-4 group/btn active:scale-95 disabled:opacity-50"
                   >
                      <DatabaseBackup size={24} className="text-indigo-400 group-hover/btn:text-white group-hover/btn:-rotate-12 transition-all" />
                      <span className="text-[11px] font-black uppercase tracking-[0.25em]">Backup Intégral</span>
@@ -297,7 +297,7 @@ export default function Receive() {
             </div>
 
             {/* Quick Context Card */}
-            <div className="bg-indigo-600 rounded-[3rem] p-10 shadow-2xl shadow-indigo-600/10 relative overflow-hidden group">
+            <div className="bg-indigo-600 rounded-[1.5rem] p-6 shadow-2xl shadow-indigo-600/10 relative overflow-hidden group">
                <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_10%_20%,rgba(255,255,255,0.05)_0%,transparent_50%)]"></div>
                <div className="flex items-center gap-6 relative z-10">
                   <div className="p-4 bg-white/10 rounded-2xl">

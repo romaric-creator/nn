@@ -88,7 +88,7 @@ export default function UsersPage() {
   if (loading && users.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] animate-pulse">
-        <div className="p-10 bg-white rounded-[3rem] shadow-xl">
+        <div className="p-6 bg-white rounded-[1.5rem] shadow-xl">
            <Settings size={48} className="text-indigo-200 mb-6 mx-auto" />
            <p className="text-slate-400 font-bold tracking-tight">Configuration des privilèges...</p>
         </div>
@@ -97,15 +97,15 @@ export default function UsersPage() {
   }
 
   return (
-    <div className="animate-in fade-in duration-700 space-y-12 pb-20">
+    <div className="animate-in fade-in duration-700 space-y-6 pb-12">
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
            <div className="flex items-center gap-3 mb-4">
               <div className="p-2.5 bg-indigo-600 rounded-xl shadow-lg shadow-indigo-600/20 rotate-3">
                  <Settings className="text-white" size={24} />
               </div>
-              <h1 className="text-3xl font-black text-slate-900 tracking-tight italic">Gestion d'Équipe</h1>
+              <h1 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight italic">Gestion d'Équipe</h1>
            </div>
            <p className="text-slate-500 font-medium ml-1">Administrez les comptes utilisateurs et les droits d'accès</p>
         </div>
@@ -121,18 +121,18 @@ export default function UsersPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-12 items-start">
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
         {/* Registration Form Column */}
-        <div className="xl:col-span-4 space-y-8 sticky top-10">
+        <div className="xl:col-span-4 space-y-6 sticky top-10">
           <div className="flex items-center gap-2 px-2">
              <Plus size={16} className="text-indigo-500" />
              <h2 className="text-[11px] font-black uppercase tracking-[0.25em] text-slate-400">Nouvelle Habilitation</h2>
           </div>
 
-          <div className="glass-card p-10 rounded-[3rem] border-slate-200/60 shadow-xl shadow-slate-200/40 relative overflow-hidden">
+          <div className="glass-card p-6 rounded-[1.5rem] border-slate-200/60 shadow-xl shadow-slate-200/40 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 blur-3xl -mr-16 -mt-16"></div>
             
-            <form onSubmit={handleCreateUser} className="space-y-8 relative z-10">
+            <form onSubmit={handleCreateUser} className="space-y-6 relative z-10">
               <div className="space-y-6">
                 <div>
                   <label className="text-xs font-black uppercase tracking-widest text-slate-400 block mb-3 ml-1">Nom Complet</label>
@@ -225,7 +225,7 @@ export default function UsersPage() {
 
            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
              {users.length === 0 ? (
-               <div className="col-span-full py-32 bg-white rounded-[3.5rem] border border-dashed border-slate-200 flex flex-col items-center justify-center text-center opacity-30">
+               <div className="col-span-full py-20 bg-white rounded-[1.5rem] border border-dashed border-slate-200 flex flex-col items-center justify-center text-center opacity-30">
                   <Users size={48} className="mb-4" />
                   <p className="font-black uppercase tracking-widest text-xs">Aucun agent configuré</p>
                </div>
@@ -233,10 +233,10 @@ export default function UsersPage() {
                users.map(u => (
                  <div 
                    key={u.id} 
-                   className={`p-8 bg-white border border-slate-100 rounded-[3rem] shadow-sm flex flex-col group transition-all duration-500 hover:shadow-2xl hover:shadow-indigo-600/5 hover:-translate-y-1 relative overflow-hidden ${u.active === 0 ? 'opacity-50 grayscale contrast-75' : ''}`}
+                   className={`p-6 bg-white border border-slate-100 rounded-[1.5rem] shadow-sm flex flex-col group transition-all duration-500 hover:shadow-2xl hover:shadow-indigo-600/5 hover:-translate-y-1 relative overflow-hidden ${u.active === 0 ? 'opacity-50 grayscale contrast-75' : ''}`}
                  >
                     {/* Header: Identity & Status */}
-                    <div className="flex items-start justify-between mb-8">
+                    <div className="flex items-start justify-between mb-6">
                        <div className="flex items-center gap-4">
                           <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-black text-xl italic shadow-lg ${u.role === 'admin' ? 'bg-gradient-to-br from-slate-800 to-slate-900 text-white' : 'bg-slate-100 text-slate-400'}`}>
                              {u.name.charAt(0).toUpperCase()}
@@ -292,7 +292,7 @@ export default function UsersPage() {
            </div>
            
            {/* System Information Box */}
-           <div className="p-8 bg-slate-900 rounded-[3rem] shadow-2xl shadow-indigo-600/10 flex items-center gap-8 relative overflow-hidden">
+           <div className="p-6 bg-slate-900 rounded-[1.5rem] shadow-2xl shadow-indigo-600/10 flex items-center gap-6 relative overflow-hidden">
               <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 blur-3xl -mr-16 -mt-16"></div>
               <div className="p-4 bg-white/5 rounded-[2rem] border border-white/5 relative z-10">
                  <Shield className="text-indigo-400" size={32} />

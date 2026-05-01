@@ -138,7 +138,7 @@ export default function Customers() {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] animate-pulse">
-        <div className="p-8 bg-white rounded-[3rem] shadow-xl">
+        <div className="p-6 bg-white rounded-[1.5rem] shadow-xl">
            <Users size={48} className="text-indigo-200 mb-6 mx-auto" />
            <p className="text-slate-400 font-bold tracking-tight">Récupération des contacts...</p>
         </div>
@@ -147,15 +147,15 @@ export default function Customers() {
   }
 
   return (
-    <div className="animate-in fade-in duration-700 space-y-12 pb-20">
+    <div className="animate-in fade-in duration-700 space-y-6 pb-12">
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
            <div className="flex items-center gap-3 mb-4">
               <div className="p-2.5 bg-indigo-600 rounded-xl shadow-lg shadow-indigo-600/20 rotate-3">
                  <Users className="text-white" size={24} />
               </div>
-              <h1 className="text-3xl font-black text-slate-900 tracking-tight">Carnet d'Adresses</h1>
+              <h1 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">Carnet d'Adresses</h1>
            </div>
            <p className="text-slate-500 font-medium ml-1">Gérez votre base de clientèle et l'historique des achats</p>
         </div>
@@ -174,7 +174,7 @@ export default function Customers() {
       </div>
 
       {/* Search Bar */}
-      <div className="glass-card p-6 rounded-[2.5rem] border-slate-200/60 shadow-xl shadow-slate-200/40">
+      <div className="glass-card p-6 rounded-[1.5rem] border-slate-200/60 shadow-xl shadow-slate-200/40">
          <div className="relative group">
             <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-indigo-500 transition-colors" size={20} />
             <input 
@@ -188,9 +188,9 @@ export default function Customers() {
       </div>
 
       {/* Customers List Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredCustomers.length === 0 ? (
-          <div className="col-span-full py-24 bg-white rounded-[3rem] border border-dashed border-slate-200 flex flex-col items-center justify-center text-center">
+          <div className="col-span-full py-16 bg-white rounded-[1.5rem] border border-dashed border-slate-200 flex flex-col items-center justify-center text-center">
              <div className="p-6 bg-slate-50 rounded-full mb-4">
                <Users size={40} className="text-slate-200" />
              </div>
@@ -200,7 +200,7 @@ export default function Customers() {
           filteredCustomers.map((c) => (
             <div
               key={c.id}
-              className="group p-8 bg-white border border-slate-100 rounded-[3rem] shadow-sm hover:shadow-2xl hover:shadow-indigo-600/5 hover:-translate-y-1.5 transition-all duration-500 relative flex flex-col"
+              className="group p-6 bg-white border border-slate-100 rounded-[1.5rem] shadow-sm hover:shadow-2xl hover:shadow-indigo-600/5 hover:-translate-y-1.5 transition-all duration-500 relative flex flex-col"
             >
               {/* Profile Bar */}
               <div className="flex items-start justify-between mb-8">
@@ -258,8 +258,8 @@ export default function Customers() {
       {/* Modal: Client Form */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[999] flex items-center justify-center p-6 animate-in fade-in duration-300">
-          <div className="bg-white rounded-[3rem] shadow-2xl w-full max-w-lg overflow-hidden border border-white/20 animate-in zoom-in-95 duration-300">
-            <div className="bg-indigo-600 text-white p-10 relative overflow-hidden">
+          <div className="bg-white rounded-[1.5rem] shadow-2xl w-full max-w-lg overflow-hidden border border-white/20 animate-in zoom-in-95 duration-300">
+            <div className="bg-indigo-600 text-white p-6 relative overflow-hidden">
                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 blur-3xl rounded-full -mr-10 -mt-10"></div>
                <div className="flex justify-between items-center relative z-10">
                  <div>
@@ -274,7 +274,7 @@ export default function Customers() {
                </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-12 space-y-8">
+            <form onSubmit={handleSubmit} className="p-6 space-y-6">
               <div className="space-y-6">
                 <div>
                   <label className="text-xs font-black uppercase tracking-widest text-slate-400 block mb-3 ml-1">Désignation / Nom</label>
@@ -320,8 +320,8 @@ export default function Customers() {
       {/* Modal: Invoices History */}
       {invoicesModal.isOpen && (
         <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-[999] flex items-center justify-center p-6 animate-in fade-in duration-300">
-          <div className="bg-white rounded-[3.5rem] shadow-2xl w-full max-w-3xl overflow-hidden border border-white/20 animate-in zoom-in-95 duration-300">
-            <div className="bg-slate-900 text-white p-10 flex justify-between items-center relative">
+          <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-3xl overflow-hidden border border-white/20 animate-in zoom-in-95 duration-300">
+            <div className="bg-slate-900 text-white p-6 flex justify-between items-center relative">
                <div className="absolute top-0 left-0 w-32 h-32 bg-indigo-500/10 blur-3xl rounded-full -ml-10 -mt-10"></div>
                <div>
                  <p className="text-indigo-400 text-[10px] font-black uppercase tracking-widest mb-1 italic">Journal Commercial</p>
@@ -334,9 +334,9 @@ export default function Customers() {
                </button>
             </div>
 
-            <div className="p-12">
+            <div className="p-6">
               {invoicesModal.invoices.length === 0 ? (
-                <div className="text-center py-20 bg-slate-50 rounded-[2.5rem] border border-dashed border-slate-200">
+                <div className="text-center py-16 bg-slate-50 rounded-[1.5rem] border border-dashed border-slate-200">
                    <div className="p-4 bg-white rounded-full inline-block mb-4 shadow-sm">
                       <History size={32} className="text-slate-200" />
                    </div>
@@ -381,7 +381,7 @@ export default function Customers() {
               )}
             </div>
 
-            <div className="p-8 bg-slate-50 border-t border-slate-200/50 flex justify-end">
+            <div className="p-6 bg-slate-50 border-t border-slate-200/50 flex justify-end">
                <button 
                  onClick={() => setInvoicesModal({ ...invoicesModal, isOpen: false })}
                  className="px-10 py-4 bg-white border border-slate-200 rounded-2xl text-slate-700 font-black uppercase tracking-widest text-xs hover:bg-slate-900 hover:text-white transition-all shadow-sm"

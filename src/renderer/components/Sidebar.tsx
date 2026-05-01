@@ -72,18 +72,18 @@ export default function Sidebar({ onLogout, user }: SidebarProps) {
   );
 
   return (
-    <aside className="w-80 h-screen glass-sidebar flex flex-col relative shrink-0 z-50">
+    <aside className="w-64 h-screen glass-sidebar flex flex-col relative shrink-0 z-50">
       {/* Brand Section */}
-      <div className="p-8">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-2xl shadow-indigo-500/20 rotate-3">
+      <div className="p-6">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/30 rotate-3">
             <Package className="text-white" size={28} />
           </div>
           <div>
-            <h2 className="text-2xl font-black text-white tracking-tighter leading-none">
-              FLEXY<span className="text-indigo-500">STORE</span>
+            <h2 className="text-xl font-black text-slate-900 tracking-tighter leading-none">
+              FLEXY<span className="text-indigo-600">STORE</span>
             </h2>
-            <div className="flex items-center gap-1.5 mt-1.5">
+            <div className="flex items-center gap-1.5 mt-1">
               <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></div>
               <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">
                 V3.0 Enterprise
@@ -94,20 +94,20 @@ export default function Sidebar({ onLogout, user }: SidebarProps) {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto custom-scrollbar px-6 py-4 space-y-1.5">
-        <div className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-600 mb-6 px-4">
-          Navigation Principale
+      <nav className="flex-1 overflow-y-auto custom-scrollbar px-4 py-3 space-y-1">
+        <div className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-600 mb-4 px-3">
+          Menu
         </div>
         {visibleItems.map((item) => (
           <NavLink
             key={item.path}
             to={item.path}
             className={({ isActive }) => `
-              flex items-center justify-between px-4 py-3.5 rounded-xl transition-all duration-300 group relative
+              flex items-center justify-between px-3 py-3 rounded-xl transition-all duration-300 group relative
               ${
                 isActive
                   ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/20"
-                  : "text-slate-400 hover:text-white hover:bg-white/5"
+                  : "text-slate-500 hover:text-indigo-600 hover:bg-indigo-50/50"
               }
             `}
           >
@@ -117,7 +117,7 @@ export default function Sidebar({ onLogout, user }: SidebarProps) {
                   <item.icon
                     size={20}
                     className={`transition-colors duration-300 ${
-                      isActive ? "text-white" : "text-slate-500 group-hover:text-indigo-400"
+                      isActive ? "text-white" : "text-slate-400 group-hover:text-indigo-500"
                     }`}
                   />
                   <span className="text-[14px] font-medium tracking-tight">
@@ -140,8 +140,8 @@ export default function Sidebar({ onLogout, user }: SidebarProps) {
       </nav>
 
       {/* User Session Section */}
-      <div className="p-6 mt-auto border-t border-slate-800/50 bg-slate-900/40">
-        <div className="p-4 rounded-2xl bg-white/5 border border-white/5 mb-4 group hover:bg-white/10 transition-all duration-300 cursor-pointer">
+      <div className="p-4 mt-auto border-t border-slate-100 bg-slate-50/50">
+        <div className="p-3 rounded-2xl bg-white border border-slate-200 shadow-sm mb-3 group hover:border-indigo-200 hover:shadow-md transition-all duration-300 cursor-pointer">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-rose-500 p-[2px]">
               <div className="w-full h-full rounded-[10px] bg-slate-900 flex items-center justify-center text-white font-bold text-sm">
@@ -149,14 +149,14 @@ export default function Sidebar({ onLogout, user }: SidebarProps) {
               </div>
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold text-white truncate group-hover:text-indigo-300 transition-colors">
+              <p className="text-sm font-bold text-slate-900 truncate group-hover:text-indigo-600 transition-colors">
                 {user?.name || "Administrateur"}
               </p>
               <div className="flex items-center gap-1.5 mt-0.5">
                 <span className="badge bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
                   {user?.role || "Admin"}
                 </span>
-                <div className="w-1 h-1 rounded-full bg-slate-600"></div>
+                <div className="w-1 h-1 rounded-full bg-slate-300"></div>
                 <span className="text-[10px] text-slate-500 font-medium">En ligne</span>
               </div>
             </div>
@@ -165,10 +165,10 @@ export default function Sidebar({ onLogout, user }: SidebarProps) {
 
         <button
           onClick={onLogout}
-          className="w-full flex items-center justify-center gap-2.5 py-3.5 bg-slate-800 text-slate-400 rounded-xl hover:bg-rose-600 hover:text-white transition-all duration-300 font-bold text-xs uppercase tracking-widest shadow-sm group"
+          className="w-full flex items-center justify-center gap-2 py-3 bg-white border border-slate-200 text-slate-600 rounded-xl hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 transition-all duration-300 font-bold text-[11px] uppercase tracking-widest shadow-sm group"
         >
           <LogOut size={16} className="group-hover:-translate-x-1 transition-transform" />
-          <span>Fermer la Session</span>
+          <span>Déconnexion</span>
         </button>
       </div>
     </aside>

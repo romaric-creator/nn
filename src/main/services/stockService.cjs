@@ -34,11 +34,25 @@ const StockService = {
         });
         return callback(err);
       }
+      
+      const productId = this.lastID;
+      
+      // Audit Log
+      const AuditService = require("./auditService.cjs");
+      AuditService.logAudit(
+        "products", 
+        productId, 
+        "CREATE", 
+        product._user_id || null, 
+        null, 
+        JSON.stringify(product)
+      );
+
       logger.info("Nouveau produit ajouté", {
-        productId: this.lastID,
+        productId: productId,
         product,
       });
-      callback(null, { lastID: this.lastID });
+      callback(null, { lastID: productId });
     });
   },
   updateProduct: (id, product, callback) => {
@@ -79,30 +93,20 @@ const StockService = {
           return callback(err);
         }
 
-        // Insert audit log (non-blocking for the main response)
+        // Insert audit log
         try {
+          const AuditService = require("./auditService.cjs");
           const oldValue = oldRow ? JSON.stringify(oldRow) : null;
           const newValue = JSON.stringify(
             Object.assign({}, oldRow || {}, product),
           );
-          db.run(
-            "INSERT INTO audit_logs (entity, entity_id, action, user_id, old_value, new_value) VALUES (?, ?, ?, ?, ?, ?)",
-            [
-              "products",
-              id,
-              "update",
-              product._user_id || null,
-              oldValue,
-              newValue,
-            ],
-            (auditErr) => {
-              if (auditErr)
-                logger.error("Impossible d'écrire audit_logs", {
-                  error: auditErr.message,
-                  entity: "products",
-                  entityId: id,
-                });
-            },
+          AuditService.logAudit(
+            "products",
+            id,
+            "UPDATE",
+            product._user_id || null,
+            oldValue,
+            newValue
           );
         } catch (e) {
           logger.error("Erreur sérialisation audit", { error: e.message });
@@ -125,6 +129,11 @@ const StockService = {
           });
           return callback(err);
         }
+
+        // Audit Log
+        const AuditService = require("./auditService.cjs");
+        AuditService.logAudit("products", id, "DELETE", null, JSON.stringify({ is_deleted: 0 }), JSON.stringify({ is_deleted: 1 }));
+
         logger.warn("Produit supprimé logiquement", { productId: id });
       callback(null, { changes: this.changes });
     });
@@ -141,6 +150,11 @@ const StockService = {
           });
           return callback(err);
         }
+
+        // Audit Log
+        const AuditService = require("./auditService.cjs");
+        AuditService.logAudit("products", id, "RESTORE", null, JSON.stringify({ is_deleted: 1 }), JSON.stringify({ is_deleted: 0 }));
+
         logger.info("Produit restauré", { productId: id });
         callback(null, { changes: this.changes });
       },

@@ -129,7 +129,7 @@ export default function Invoices() {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] animate-pulse">
-        <div className="p-8 bg-white rounded-[3rem] shadow-xl shadow-slate-200/50">
+        <div className="p-6 bg-white rounded-[1.5rem] shadow-xl shadow-slate-200/50">
            <FileText size={48} className="text-indigo-200 mb-6 mx-auto" />
            <p className="text-slate-400 font-bold tracking-tight">Analyse des registres...</p>
         </div>
@@ -140,15 +140,15 @@ export default function Invoices() {
   const totalInvoiced = filteredInvoices.reduce((sum, inv) => sum + inv.total_amount, 0);
 
   return (
-    <div className="animate-in fade-in duration-700 space-y-10">
+    <div className="animate-in fade-in duration-700 space-y-6 pb-12">
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
            <div className="flex items-center gap-3 mb-4">
               <div className="p-2.5 bg-rose-600 rounded-xl shadow-lg shadow-rose-600/20 rotate-3">
                  <Receipt className="text-white" size={24} />
               </div>
-              <h1 className="text-3xl font-black text-slate-900 tracking-tight italic">Journal des Factures</h1>
+              <h1 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight italic">Journal des Factures</h1>
            </div>
            <p className="text-slate-500 font-medium ml-1">Consultez et gérez l'historique de vos ventes</p>
         </div>
@@ -171,7 +171,7 @@ export default function Invoices() {
       </div>
 
       {/* Control Bar: Filters & Search */}
-      <div className="glass-card p-6 rounded-[2.5rem] border-slate-200/60 shadow-xl shadow-slate-200/40 flex flex-col lg:flex-row items-center gap-6">
+      <div className="glass-card p-6 rounded-[1.5rem] border-slate-200/60 shadow-xl shadow-slate-200/40 flex flex-col lg:flex-row items-center gap-6">
          <div className="relative group flex-1 w-full">
             <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-indigo-500 transition-colors" size={20} />
             <input 
@@ -212,7 +212,7 @@ export default function Invoices() {
       {/* Main Content: Table List */}
       <div className="space-y-4">
         {filteredInvoices.length === 0 ? (
-          <div className="py-24 bg-white rounded-[3rem] border border-dashed border-slate-200 flex flex-col items-center justify-center text-center">
+          <div className="py-16 bg-white rounded-[1.5rem] border border-dashed border-slate-200 flex flex-col items-center justify-center text-center">
              <div className="p-6 bg-slate-50 rounded-full mb-4">
                <Receipt size={40} className="text-slate-200" />
              </div>
@@ -223,7 +223,7 @@ export default function Invoices() {
             {filteredInvoices.map((invoice) => (
               <div 
                 key={invoice.id}
-                className="group p-8 bg-white border border-slate-100 rounded-[2.5rem] shadow-sm hover:shadow-2xl hover:shadow-indigo-600/5 hover:-translate-y-1 transition-all duration-500 relative overflow-hidden"
+                className="group p-6 bg-white border border-slate-100 rounded-[1.5rem] shadow-sm hover:shadow-2xl hover:shadow-indigo-600/5 hover:-translate-y-1 transition-all duration-500 relative overflow-hidden"
               >
                 {/* Status indicator line */}
                 <div className={`absolute top-0 left-10 w-16 h-1.5 rounded-b-full ${
