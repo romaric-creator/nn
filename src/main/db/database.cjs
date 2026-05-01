@@ -361,8 +361,8 @@ const initDb = (databaseInstance, schemaFilePath) => {
           // Initialiser les données de base si la table products est vide (première installation)
           databaseInstance.get("SELECT COUNT(*) as count FROM products", (errCount, rowCount) => {
             if (!errCount && rowCount && rowCount.count === 0) {
-              const seedPath = app
-                ? path.join(app.isPackaged ? process.resourcesPath : __dirname + "../../../", "seed.sql")
+              const seedPath = app && app.isPackaged
+                ? path.join(process.resourcesPath, "seed.sql")
                 : path.join(__dirname, "../../../seed.sql");
                 
               if (fs.existsSync(seedPath)) {
