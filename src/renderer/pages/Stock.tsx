@@ -58,6 +58,7 @@ export default function Stock() {
     sale_price: 0,
     stock: 0,
     min_stock: 2,
+    remarque: "",
   });
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -643,10 +644,18 @@ export default function Stock() {
                             <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Catégorie</label>
                             <select
                               className="premium-input bg-white"
-                              value={isModalOpen ? form.category : selectedProduct?.category}
+                              value={isModalOpen ? form.category : selectedProduct?.category || ""}
                               onChange={(e) => isModalOpen ? setForm({ ...form, category: e.target.value }) : setSelectedProduct({...selectedProduct!, category: e.target.value})}
                             >
-                              {["Ordinateur Portable", "Ordinateur Fixe", "Tablette", "Stockage", "Périphérique", "Audio", "Logiciel", "Composant", "Accessoire", "Écran", "Smartphone"].map(cat => (
+                              {[
+                                "Laptops", "Stockage", "Informatique", "Moniteurs", 
+                                "Chargeurs PC", "Chargeurs Tel", "Câbles & Vidéo", 
+                                "Téléphonie", "Audio", "Gaming", "Multimédia", 
+                                "Piles & Énergie", "Batteries", "Rallonges", "Outils",
+                                "Ordinateur Portable", "Ordinateur Fixe", "Tablette", 
+                                "Périphérique", "Logiciel", "Composant", "Accessoire", 
+                                "Écran", "Smartphone"
+                              ].map(cat => (
                                 <option key={cat} value={cat}>{cat.toUpperCase()}</option>
                               ))}
                             </select>
@@ -727,6 +736,19 @@ export default function Stock() {
                               onChange={(e) => isModalOpen ? setForm({ ...form, sale_price: Number(e.target.value) }) : setSelectedProduct({...selectedProduct!, sale_price: Number(e.target.value)})}
                             />
                         </div>
+                      </div>
+                   </div>
+
+                   {/* Remarque Section */}
+                   <div className="md:col-span-3">
+                      <div className="space-y-3">
+                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Notes / Remarques</label>
+                        <textarea
+                          className="premium-input bg-white h-24 py-4 resize-none"
+                          placeholder="Informations complémentaires..."
+                          value={isModalOpen ? form.remarque : selectedProduct?.remarque || ""}
+                          onChange={(e) => isModalOpen ? setForm({ ...form, remarque: e.target.value }) : setSelectedProduct({...selectedProduct!, remarque: e.target.value})}
+                        />
                       </div>
                    </div>
                 </div>

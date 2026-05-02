@@ -9,8 +9,8 @@ const StockService = {
     db.get("SELECT * FROM products WHERE id = ? AND is_deleted = 0", [id], callback);
   },
   addProduct: (product, callback) => {
-    const sql = `INSERT INTO products (category, brand, model, state, purchase_price, sale_price, min_sale_price, entry_date, cpu, ram, gpu, storage, stock)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+    const sql = `INSERT INTO products (category, brand, model, state, purchase_price, sale_price, min_sale_price, entry_date, cpu, ram, gpu, storage, stock, remarque)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
     const params = [
       product.category,
       product.brand,
@@ -25,6 +25,7 @@ const StockService = {
       product.gpu,
       product.storage,
       product.stock || 0,
+      product.remarque || "",
     ];
     db.run(sql, params, function (err) {
       if (err) {
@@ -66,7 +67,7 @@ const StockService = {
         return callback(gErr);
       }
 
-      const sql = `UPDATE products SET category=?, brand=?, model=?, state=?, purchase_price=?, sale_price=?, min_sale_price=?, entry_date=?, cpu=?, ram=?, gpu=?, storage=?, stock=? WHERE id=?`;
+      const sql = `UPDATE products SET category=?, brand=?, model=?, state=?, purchase_price=?, sale_price=?, min_sale_price=?, entry_date=?, cpu=?, ram=?, gpu=?, storage=?, stock=?, remarque=? WHERE id=?`;
       const params = [
         product.category,
         product.brand,
@@ -81,6 +82,7 @@ const StockService = {
         product.gpu,
         product.storage,
         product.stock,
+        product.remarque || "",
         id,
       ];
 
