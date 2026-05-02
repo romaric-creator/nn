@@ -13,6 +13,7 @@ import {
   Receipt,
 } from "lucide-react";
 import { useNotify } from "../components/NotificationProvider";
+import { fuzzySearch } from "../utils/searchUtils";
 
 type Customer = { id: number; name: string; phone: string };
 type Invoice = {
@@ -131,7 +132,7 @@ export default function Customers() {
 
   const filteredCustomers = customers.filter(
     (c) =>
-      c.name.toLowerCase().includes(search.toLowerCase()) ||
+      fuzzySearch(c.name, search) ||
       c.phone.includes(search)
   );
 

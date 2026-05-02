@@ -97,7 +97,7 @@ export default function App() {
                   <Route path="/" element={<Home />} />
                   <Route
                     path="/stock"
-                    element={user?.role === "admin" ? <Stock /> : <Home />}
+                    element={user?.role === "admin" || user?.role === "vendeur" ? <Stock /> : <Home />}
                   />
                   <Route
                     path="/receive"

@@ -17,6 +17,7 @@ import {
   Database
 } from "lucide-react";
 import { useNotify } from "../components/NotificationProvider";
+import { fuzzySearch } from "../utils/searchUtils";
 
 export default function Audits() {
     const [logs, setLogs] = useState<any[]>([]);
@@ -48,16 +49,10 @@ export default function Audits() {
     };
 
     const filteredLogs = logs.filter(log => {
-        const term = searchTerm.toLowerCase();
-        const action = log.action || "";
-        const name = log.user_name || "Système";
-        const entity = log.entity || "";
-        const reason = log.reason || "";
-        
-        const matchesTerm = action.toLowerCase().includes(term) ||
-            name.toLowerCase().includes(term) ||
-            entity.toLowerCase().includes(term) ||
-            reason.toLowerCase().includes(term);
+        const matchesTerm = fuzzySearch(log.action || "", searchTerm) ||
+            fuzzySearch(log.user_name || "Système", searchTerm) ||
+            fuzzySearch(log.entity || "", searchTerm) ||
+            fuzzySearch(log.reason || "", searchTerm);
             
         const matchesDate = dateFilter ? (log.timestamp && log.timestamp.substring(0, 10) === dateFilter) : true;
 

@@ -1,9 +1,7 @@
 // src/main/main.cjs
 // Point d'entrée principal Electron (Cameroun, architecture pro)
 
-const electron = require("electron");
-const app = electron.app || null;
-const { BrowserWindow, ipcMain, Menu } = electron;
+const { app, BrowserWindow, ipcMain, Menu } = require("electron");
 const path = require("path");
 const { initDb, db, schemaPath } = require("./db/database.cjs");
 

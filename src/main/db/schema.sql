@@ -25,7 +25,8 @@ CREATE TABLE IF NOT EXISTS products (
   storage TEXT,
   stock INTEGER DEFAULT 0,
   min_stock INTEGER DEFAULT 2, -- Seuil d'alerte
-  is_deleted INTEGER DEFAULT 0 -- 0 = non supprimé, 1 = supprimé logiquement
+  is_deleted INTEGER DEFAULT 0, -- 0 = non supprimé, 1 = supprimé logiquement
+  remarque TEXT
 );
 
 CREATE TABLE IF NOT EXISTS suppliers (

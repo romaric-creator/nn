@@ -15,6 +15,7 @@ import {
   PlusCircle,
 } from "lucide-react";
 import { useNotify } from "../components/NotificationProvider";
+import { fuzzySearch } from "../utils/searchUtils";
 
 type Product = {
   id: number;
@@ -230,8 +231,8 @@ export default function Sales() {
 
   const filteredProducts = products.filter(
     (p) => {
-      const matchesSearch = (p.model || '').toLowerCase().includes(search.toLowerCase()) ||
-                            (p.brand || '').toLowerCase().includes(search.toLowerCase());
+      const matchesSearch = fuzzySearch(p.model, search) || 
+                            fuzzySearch(p.brand, search);
       const matchesCategory = selectedCategory === "Toutes" || 
                               p.category?.trim().toLowerCase() === selectedCategory.trim().toLowerCase();
       return matchesSearch && matchesCategory;
@@ -327,9 +328,9 @@ export default function Sales() {
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-[8px] font-black bg-slate-100 text-slate-500 px-2 py-0.5 rounded uppercase tracking-widest">{p.category}</span>
                   </div>
-                  <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-indigo-500 mb-1">{p.brand}</p>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-indigo-500 mb-1">{p.model}</p>
                   <h3 className="font-black text-slate-800 text-sm leading-tight mb-4 group-hover:text-indigo-600 transition-colors line-clamp-2 h-10">
-                    {p.model}
+                    {p.brand}
                   </h3>
                   
                   <div className="flex items-center justify-between mt-auto pt-4 border-t border-slate-50 w-full">
@@ -488,7 +489,7 @@ export default function Sales() {
                              onClick={() => { setCustomerId(null); setShowCustomerDropdown(false); }}
                              className="w-full text-left px-6 py-3.5 text-xs font-black uppercase tracking-widest text-slate-400 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
                            >-- Passage --</button>
-                           {customers.filter(c => c.name.toLowerCase().includes(customerSearch.toLowerCase())).map(c => (
+                           {customers.filter(c => fuzzySearch(c.name, customerSearch)).map(c => (
                              <button 
                                key={c.id}
                                onClick={() => { setCustomerId(c.id); setShowCustomerDropdown(false); }}

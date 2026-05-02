@@ -1,12 +1,21 @@
 const path = require("path");
 const fs = require("fs");
 const sqlite3 = require("sqlite3").verbose();
-const electron = require("electron");
-const app = electron.app || null;
 
-const schemaPath = app && app.isPackaged
-   ? path.join(process.resourcesPath, "schema.sql")
-   : path.join(__dirname, "schema.sql");
+let app;
+try {
+  app = require("electron").app;
+} catch (err) {
+  // Pas dans un environnement Electron (ex: scripts de test ou migrations)
+  app = null;
+}
+
+// Determine if we are packaged
+const isPackaged = process.env.NODE_ENV === 'production';
+
+const schemaPath = isPackaged
+  ? path.join(process.resourcesPath, "schema.sql")
+  : path.join(__dirname, "schema.sql");
 
 function ensureDbDir(dbFilePath) {
   const dir = path.dirname(dbFilePath);
@@ -55,6 +64,17 @@ const initDb = (databaseInstance, schemaFilePath) => {
               );
               console.log(
                 "Migration : Colonne is_deleted ajoutée à la table products.",
+              );
+            }
+
+            // Migration : Vérifier si remarque existe, sinon l'ajouter
+            const hasRemarque = columns.some((col) => col.name === "remarque");
+            if (!hasRemarque) {
+              databaseInstance.run(
+                "ALTER TABLE products ADD COLUMN remarque TEXT",
+              );
+              console.log(
+                "Migration : Colonne remarque ajoutée à la table products.",
               );
             }
           }

@@ -17,6 +17,7 @@ import {
   Printer,
 } from "lucide-react";
 import { useNotify } from "../components/NotificationProvider";
+import { fuzzySearch } from "../utils/searchUtils";
 
 type Invoice = {
   id: number;
@@ -76,12 +77,11 @@ export default function Invoices() {
     }
 
     if (searchTerm) {
-      const term = searchTerm.toLowerCase();
       filtered = filtered.filter(
         (inv) =>
-          inv.invoice_number.toLowerCase().includes(term) ||
-          (inv.customer_name?.toLowerCase() || "").includes(term) ||
-          inv.invoice_date.includes(term)
+          fuzzySearch(inv.invoice_number, searchTerm) ||
+          fuzzySearch(inv.customer_name || "", searchTerm) ||
+          fuzzySearch(inv.invoice_date, searchTerm)
       );
     }
 

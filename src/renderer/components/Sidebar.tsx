@@ -1,4 +1,3 @@
-import React from "react";
 import { NavLink } from "react-router-dom";
 import {
   LayoutDashboard,
@@ -31,7 +30,7 @@ export default function Sidebar({ onLogout, user }: SidebarProps) {
       path: "/stock",
       icon: Package,
       label: "Inventaire",
-      roles: ["admin"],
+      roles: ["admin", "vendeur"],
     },
     {
       path: "/receive",

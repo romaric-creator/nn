@@ -15,6 +15,7 @@ import {
   Filter,
 } from "lucide-react";
 import { useNotify } from "../components/NotificationProvider";
+import { fuzzySearch } from "../utils/searchUtils";
 
 type Product = {
   id: number;
@@ -82,25 +83,12 @@ export default function Stock() {
   const loadProducts = async () => {
     setLoading(true);
     try {
-      const res: any = await window.electronAPI.invoke(
-        searchQuery ? "stock:search" : "stock:getAll",
-        searchQuery,
-      );
+      const res: any = await window.electronAPI.invoke("stock:getAll");
       if (res?.success) {
         const fullData = res.data || [];
-        // Only update allCategories if we are not searching, to keep the full list available
-        if (!searchQuery) {
-          const cats = [...new Set(fullData.map((p: any) => p.category).filter(Boolean))] as string[];
-          setAllCategories(cats);
-        }
-        
-        let data = fullData;
-        if (selectedCategory !== "Toutes") {
-          data = data.filter((p: any) => 
-            p.category?.trim().toLowerCase() === selectedCategory.trim().toLowerCase()
-          );
-        }
-        setProducts(data);
+        const cats = [...new Set(fullData.map((p: any) => p.category).filter(Boolean))] as string[];
+        setAllCategories(cats);
+        setProducts(fullData);
       }
     } catch (e) {
       console.error(e);
@@ -120,7 +108,7 @@ export default function Stock() {
   useEffect(() => {
     if (activeTab === "inventory") loadProducts();
     else loadDefective();
-  }, [searchQuery, activeTab, selectedCategory]);
+  }, [activeTab]);
 
   const handleEditProduct = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -267,6 +255,15 @@ export default function Stock() {
     }
   };
 
+  const filteredProducts = products.filter((p) => {
+    const matchesSearch = fuzzySearch(p.model, searchQuery) || 
+                         fuzzySearch(p.brand, searchQuery) ||
+                         fuzzySearch(p.category, searchQuery);
+    const matchesCategory = selectedCategory === "Toutes" || 
+                           p.category?.trim().toLowerCase() === selectedCategory.trim().toLowerCase();
+    return matchesSearch && matchesCategory;
+  });
+
   return (
     <div className="space-y-6 pb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Header Section */}
@@ -404,7 +401,7 @@ export default function Stock() {
                         <td className="py-8 px-10"><div className="h-10 w-32 bg-slate-100 rounded-xl ml-auto"></div></td>
                       </tr>
                     ))
-                  ) : products.length === 0 ? (
+                  ) : filteredProducts.length === 0 ? (
                     <tr>
                       <td colSpan={4} className="py-32 text-center">
                         <div className="flex flex-col items-center gap-4 opacity-20">
@@ -414,7 +411,7 @@ export default function Stock() {
                       </td>
                     </tr>
                   ) : (
-                    products.map((p) => (
+                    filteredProducts.map((p) => (
                       <tr key={p.id} className="group hover:bg-slate-50/50 transition-all duration-300">
                         <td className="py-4 px-6">
                           <div className="flex items-center gap-3">
@@ -423,10 +420,10 @@ export default function Stock() {
                              </div>
                              <div>
                                 <div className="font-extrabold text-sm text-slate-900 tracking-tight uppercase leading-none mb-1 group-hover:text-indigo-600 transition-colors">
-                                  {p.model}
+                                  {p.brand}
                                 </div>
                                 <div className="flex items-center gap-2">
-                                   <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{p.brand}</span>
+                                   <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{p.model}</span>
                                    <span className="w-1 h-1 rounded-full bg-slate-300"></span>
                                    <span className="text-[9px] font-bold text-indigo-500 group-hover:bg-indigo-50 px-1.5 rounded py-0.5 transition-all">{p.category}</span>
                                 </div>
