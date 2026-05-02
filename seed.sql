@@ -1,31 +1,13 @@
--- Fichier de données de base (Seed)
--- Généré à partir de l'inventaire fourni par l'utilisateur
-
+-- Fichier harmonisé et fusionné
 DROP TABLE IF EXISTS products;
-
 CREATE TABLE products (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    category TEXT,
-    brand TEXT,
-    model TEXT,
-    state TEXT,
-    stock INTEGER DEFAULT 0,
-    purchase_price REAL,
-    sale_price REAL,
-    min_sale_price REAL,
-    entry_date TEXT,
-    cpu TEXT,
-    ram TEXT,
-    gpu TEXT,
-    storage TEXT,
-    min_stock INTEGER DEFAULT 2,
-    is_deleted INTEGER DEFAULT 0,
-    remarque TEXT,
-    UNIQUE(category, brand, model, state)
+    category TEXT, brand TEXT, model TEXT, state TEXT, stock INTEGER DEFAULT 0,
+    purchase_price REAL, sale_price REAL, min_sale_price REAL, entry_date TEXT,
+    cpu TEXT, ram TEXT, gpu TEXT, storage TEXT, min_stock INTEGER DEFAULT 2,
+    is_deleted INTEGER DEFAULT 0, remarque TEXT, UNIQUE(category, brand, model, state)
 );
-
--- Insertion des données
-INSERT OR IGNORE INTO products (category, brand, model, state, stock, sale_price, min_sale_price) VALUES 
+INSERT INTO products (category, brand, model, state, stock, sale_price, min_sale_price) VALUES
 ('Laptops', 'Laptop Fujitsu', '', 'Occasion', 0 , 0.0, 0.0),
 ('Laptops', 'Laptop HP', '', 'Occasion', 1 , 0.0, 0.0),
 ('Laptops', 'Laptop Asus', '', 'Occasion', 1 , 0.0, 0.0),
@@ -70,7 +52,6 @@ INSERT OR IGNORE INTO products (category, brand, model, state, stock, sale_price
 ('Stockage', 'Clé USB', '64 Go', 'Neuf', 3 , 0.0, 0.0),
 ('Informatique', 'Mini Clavier', '', 'Neuf', 1 , 0.0, 0.0),
 ('Informatique', 'Clavier Flexible', '', 'Neuf', 3 , 0.0, 0.0),
-('Informatique', 'Clavier d''occasion', '', 'Occasion', 6 , 0.0, 0.0),
 ('Informatique', 'Souris Bluetooth', '', 'Neuf', 9 , 0.0, 0.0),
 ('Informatique', 'Souris Brocante', '', 'Occasion', 6 , 0.0, 0.0),
 ('Informatique', 'Souris Vrac', '', 'Occasion', 3 , 0.0, 0.0),
@@ -94,18 +75,17 @@ INSERT OR IGNORE INTO products (category, brand, model, state, stock, sale_price
 ('Moniteurs', 'Moniteur', '19 pouces', 'Occasion', 0 , 0.0, 0.0),
 ('Moniteurs', 'Moniteur', '24 pouces', 'Occasion', 2 , 0.0, 0.0),
 ('Moniteurs', 'Moniteur', '24 pouces sans bordures', 'Neuf', 2 , 0.0, 0.0),
-('Chargeurs PC', 'Chargeur Dell', 'Petit Bout', 'Occasion', 0 , 0.0, 0.0),
+('Chargeurs PC', 'Chargeur Dell', 'Petit Bout', 'Occasion', 4 , 0.0, 0.0),
 ('Chargeurs PC', 'Chargeur Dell', 'Gros Bout', 'Occasion', 0 , 0.0, 0.0),
 ('Chargeurs PC', 'Chargeur Dell', 'Type-C', 'Neuf', 0 , 0.0, 0.0),
 ('Chargeurs PC', 'Chargeur Dell', 'GB 6A et 9A', 'Occasion', 3 , 0.0, 0.0),
 ('Chargeurs PC', 'Chargeur Dell', 'GB 5A et 4A', 'Occasion', 5 , 0.0, 0.0),
-('Chargeurs PC', 'Chargeur Dell', 'PB', 'Occasion', 4 , 0.0, 0.0),
 ('Chargeurs PC', 'Chargeur Dell', 'USB', 'Occasion', 10 , 0.0, 0.0),
 ('Chargeurs PC', 'Chargeur Lenovo', 'Bout carré', 'Occasion', 0 , 0.0, 0.0),
 ('Chargeurs PC', 'Chargeur Lenovo', 'Type-C', 'Neuf', 0 , 0.0, 0.0),
 ('Chargeurs PC', 'Chargeur Lenovo', 'BC', 'Occasion', 4 , 0.0, 0.0),
 ('Chargeurs PC', 'Chargeur Lenovo', 'BR', 'Occasion', 4 , 0.0, 0.0),
-('Chargeurs PC', 'Chargeur Lenovo', 'PB', 'Occasion', 2 , 0.0, 0.0),
+('Chargeurs PC', 'Chargeur Lenovo', 'Petit Bout', 'Occasion', 2 , 0.0, 0.0),
 ('Chargeurs PC', 'Chargeur HP', 'Gros Bout', 'Occasion', 0 , 0.0, 0.0),
 ('Chargeurs PC', 'Chargeur HP', 'Bout bleu', 'Occasion', 8 , 0.0, 0.0),
 ('Chargeurs PC', 'Chargeur HP', 'GB 6 et 9A', 'Occasion', 2 , 0.0, 0.0),
@@ -186,8 +166,8 @@ INSERT OR IGNORE INTO products (category, brand, model, state, stock, sale_price
 ('Multimédia', 'Télécommande', 'Hisense', 'Neuf', 0 , 0.0, 0.0),
 ('Multimédia', 'Télécommande', 'ND', 'Neuf', 0 , 0.0, 0.0),
 ('Multimédia', 'Combo TV', '', 'Occasion', 0 , 0.0, 0.0),
-('Multimédia', 'Mort Carte Mémoire USB', 'PM', 'Neuf', 4 , 0.0, 0.0),
-('Multimédia', 'Mort Carte Mémoire USB', 'GM', 'Neuf', 0 , 0.0, 0.0),
+('Multimédia', 'Mort Carte Mémoire USB', 'Petit Modèle', 'Neuf', 4 , 0.0, 0.0),
+('Multimédia', 'Mort Carte Mémoire USB', 'Grand Modèle', 'Neuf', 0 , 0.0, 0.0),
 ('Piles & Énergie', 'Pile CMOS', '2032', 'Neuf', 0 , 0.0, 0.0),
 ('Piles & Énergie', 'Pile CMOS', '2025', 'Neuf', 0 , 0.0, 0.0),
 ('Piles & Énergie', 'Pile 9V', '', 'Neuf', 19 , 0.0, 0.0),
@@ -197,10 +177,10 @@ INSERT OR IGNORE INTO products (category, brand, model, state, stock, sale_price
 ('Piles & Énergie', 'Pile Bouton', 'LR41W', 'Neuf', 8 , 0.0, 0.0),
 ('Piles & Énergie', 'Pile Bouton', 'LR62W', 'Neuf', 5 , 0.0, 0.0),
 ('Piles & Énergie', 'Pile Kodak/Toceba', '', 'Neuf', 0 , 0.0, 0.0),
-('Piles & Énergie', 'Pile Duracell', 'GM', 'Neuf', 2 , 0.0, 0.0),
-('Piles & Énergie', 'Pile Duracell', 'PM', 'Neuf', 0 , 0.0, 0.0),
-('Piles & Énergie', 'Pile 10 éléments Vrac', 'PM', 'Neuf', 52 , 0.0, 0.0),
-('Piles & Énergie', 'Pile 10 éléments Vrac', 'GM', 'Neuf', 7 , 0.0, 0.0),
+('Piles & Énergie', 'Pile Duracell', 'Grand Modèle', 'Neuf', 2 , 0.0, 0.0),
+('Piles & Énergie', 'Pile Duracell', 'Petit Modèle', 'Neuf', 0 , 0.0, 0.0),
+('Piles & Énergie', 'Pile 10 éléments Vrac', 'Petit Modèle', 'Neuf', 52 , 0.0, 0.0),
+('Piles & Énergie', 'Pile 10 éléments Vrac', 'Grand Modèle', 'Neuf', 7 , 0.0, 0.0),
 ('Batteries', 'Batterie iTel', '2500 mAh', 'Neuf', 0 , 0.0, 0.0),
 ('Batteries', 'Batterie iTel', '1500 mAh', 'Neuf', 0 , 0.0, 0.0),
 ('Batteries', 'Batterie iTel', '2580', 'Neuf', 2 , 0.0, 0.0),
@@ -210,7 +190,4 @@ INSERT OR IGNORE INTO products (category, brand, model, state, stock, sale_price
 ('Rallonges', 'Rallonge PowerMax', '', 'Neuf', 0 , 0.0, 0.0),
 ('Rallonges', 'Rallonge Simple', '3 prises', 'Neuf', 0 , 0.0, 0.0),
 ('Rallonges', 'Rallonge Simple', '4 prises', 'Neuf', 0 , 0.0, 0.0),
-('Rallonges', 'Rallonge d''occasion', '3 prises', 'Occasion', 0 , 0.0, 0.0),
-('Rallonges', 'Rallonge d''occasion', '4 prises', 'Occasion', 0 , 0.0, 0.0),
-('Rallonges', 'Rallonge d''occasion', '6 prises', 'Occasion', 0 , 0.0, 0.0),
 ('Outils', 'Multimètre', '', 'Neuf', 8 , 0.0, 0.0);
