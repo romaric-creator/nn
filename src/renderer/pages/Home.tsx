@@ -12,6 +12,7 @@ import {
   History,
   Activity,
   Calendar,
+  ShieldCheck,
 } from "lucide-react";
 
 function isValidNumber(val: any) {
@@ -85,6 +86,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [weeklyData, setWeeklyData] = useState<any[]>([]);
   const [auditLogs, setAuditLogs] = useState<any[]>([]);
+  const [dbStatus, setDbStatus] = useState<string>("vérification...");
 
   const user = JSON.parse(localStorage.getItem("user") || "{}");
   const isAdmin = user.role === "admin";
@@ -100,6 +102,7 @@ export default function Home() {
           monthlySalesRes,
           weeklyStatsRes,
           auditRes,
+          dbStatusRes,
         ]: any = await Promise.all([
           window.electronAPI.invoke("stock:getAll"),
           window.electronAPI.invoke("customer:getAll"),
@@ -112,6 +115,7 @@ export default function Home() {
           isAdmin
             ? window.electronAPI.invoke("audit:getLogs", 10)
             : Promise.resolve({ success: true, data: [] }),
+          window.electronAPI.invoke("db:status"),
         ]);
 
         if (productsRes.success && Array.isArray(productsRes.data))
@@ -126,6 +130,7 @@ export default function Home() {
           setWeeklyData(weeklyStatsRes.data.slice(-7));
         }
         if (auditRes?.success) setAuditLogs(auditRes.data);
+        if (dbStatusRes?.success) setDbStatus(dbStatusRes.status);
       } catch (error) {
         console.error("Erreur dashboard");
       }
@@ -158,12 +163,20 @@ export default function Home() {
         <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-indigo-500/10 blur-[100px] rounded-full"></div>
         
         <div className="relative z-10 max-w-2xl">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-50 border border-indigo-100 mb-6 font-bold text-indigo-600">
-            <Activity size={14} className="text-indigo-600" />
-            <span className="text-[10px] uppercase tracking-widest">Système Opérationnel</span>
+          <div className="flex flex-wrap items-center gap-3 mb-6">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-50 border border-indigo-100 font-bold text-indigo-600">
+              <Activity size={14} className="text-indigo-600" />
+              <span className="text-[10px] uppercase tracking-widest">Système Opérationnel</span>
+            </div>
+            <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full font-bold ${(dbStatus === 'ok' || dbStatus === 'vérification...') ? 'bg-emerald-50 border border-emerald-100 text-emerald-600' : 'bg-rose-50 border border-rose-100 text-rose-600'}`}>
+              <ShieldCheck size={14} />
+              <span className="text-[10px] uppercase tracking-widest">
+                Base de données: {dbStatus === 'ok' ? 'Intègre' : (dbStatus === 'vérification...' ? 'Vérification' : 'Alerte')}
+              </span>
+            </div>
           </div>
           <h1 className="text-4xl md:text-5xl font-black tracking-tighter mb-4 text-slate-900">
-            Bonjour, <span className="text-indigo-600">{user.name?.split(' ')[0] || "Admin"}</span> 👋
+            Bonjour, <span className="text-indigo-600">{user.name?.split(' ')[0] || "Admin"}</span>
           </h1>
           <p className="text-slate-500 text-lg font-medium leading-relaxed mb-10 max-w-lg">
             Bienvenue sur votre espace de gestion. Suivez vos performances en temps réel et gérez votre stock en toute simplicité.

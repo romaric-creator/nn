@@ -1,6 +1,7 @@
 function computeCommission(totalRevenue, percent) {
   const p = Number(percent) || 0;
-  return (Number(totalRevenue) || 0) * (p / 100);
+  // Calcul précis pour monnaie (CFA est une monnaie sans décimales en pratique)
+  return Math.floor((Number(totalRevenue) || 0) * (p / 100));
 }
 
 function commissionsToCSV(rows) {

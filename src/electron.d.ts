@@ -84,6 +84,7 @@ type ValidChannel =
   | "user:deactivate"
   | "user:login"
   | "user:logAction"
+  | "user:updatePassword"
   // Audit
   | "audit:getLogs"
   | "audit:getUserLogs"
@@ -97,6 +98,7 @@ type ValidChannel =
   | "db:backup"
   | "db:restore"
   | "db:export-sql"
+  | "db:status"
   // Unités
   | "units:list"
   | "units:find"

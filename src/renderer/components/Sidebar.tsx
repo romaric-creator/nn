@@ -16,9 +16,12 @@ import {
 interface SidebarProps {
   onLogout: () => void;
   user: any;
+  isOpen: boolean;
+  closeSidebar: () => void;
+  onChangePassword: () => void;
 }
 
-export default function Sidebar({ onLogout, user }: SidebarProps) {
+export default function Sidebar({ onLogout, user, isOpen, closeSidebar, onChangePassword }: SidebarProps) {
   const menuItems = [
     {
       path: "/",
@@ -71,7 +74,20 @@ export default function Sidebar({ onLogout, user }: SidebarProps) {
   );
 
   return (
-    <aside className="w-64 h-screen glass-sidebar flex flex-col relative shrink-0 z-50">
+    <>
+      {/* Overlay for mobile */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[45] md:hidden transition-opacity duration-300"
+          onClick={closeSidebar}
+        />
+      )}
+
+      <aside className={`
+        fixed md:relative w-64 h-screen glass-sidebar flex flex-col z-50 
+        transition-transform duration-500 ease-in-out
+        ${isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
+      `}>
       {/* Brand Section */}
       <div className="p-6">
         <div className="flex items-center gap-3">
@@ -101,6 +117,9 @@ export default function Sidebar({ onLogout, user }: SidebarProps) {
           <NavLink
             key={item.path}
             to={item.path}
+            onClick={() => {
+              if (window.innerWidth < 768) closeSidebar();
+            }}
             className={({ isActive }) => `
               flex items-center justify-between px-3 py-3 rounded-xl transition-all duration-300 group relative
               ${
@@ -140,7 +159,10 @@ export default function Sidebar({ onLogout, user }: SidebarProps) {
 
       {/* User Session Section */}
       <div className="p-4 mt-auto border-t border-slate-100 bg-slate-50/50">
-        <div className="p-3 rounded-2xl bg-white border border-slate-200 shadow-sm mb-3 group hover:border-indigo-200 hover:shadow-md transition-all duration-300 cursor-pointer">
+        <div 
+          onClick={onChangePassword}
+          className="p-3 rounded-2xl bg-white border border-slate-200 shadow-sm mb-3 group hover:border-indigo-200 hover:shadow-md transition-all duration-300 cursor-pointer"
+        >
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-rose-500 p-[2px]">
               <div className="w-full h-full rounded-[10px] bg-slate-900 flex items-center justify-center text-white font-bold text-sm">
@@ -156,7 +178,7 @@ export default function Sidebar({ onLogout, user }: SidebarProps) {
                   {user?.role || "Admin"}
                 </span>
                 <div className="w-1 h-1 rounded-full bg-slate-300"></div>
-                <span className="text-[10px] text-slate-500 font-medium">En ligne</span>
+                <span className="text-[10px] text-slate-500 font-medium">Click pour sécuriser</span>
               </div>
             </div>
           </div>
@@ -170,6 +192,7 @@ export default function Sidebar({ onLogout, user }: SidebarProps) {
           <span>Déconnexion</span>
         </button>
       </div>
-    </aside>
+      </aside>
+    </>
   );
 }

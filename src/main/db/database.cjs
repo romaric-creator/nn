@@ -26,11 +26,19 @@ function ensureDbDir(dbFilePath) {
 
 function createDbConnection(dbFilePath) {
   ensureDbDir(dbFilePath);
-  return new sqlite3.Database(dbFilePath, (err) => {
+  const database = new sqlite3.Database(dbFilePath, (err) => {
     if (err) {
       console.error("Erreur ouverture DB:", err.message);
     }
   });
+
+  // Enable WAL mode for better concurrency and performance
+  database.run("PRAGMA journal_mode = WAL;", (err) => {
+    if (err) console.error("Could not enable WAL mode:", err.message);
+    else console.log("SQLite WAL mode activated.");
+  });
+
+  return database;
 }
 
 const initDb = (databaseInstance, schemaFilePath) => {
@@ -99,6 +107,8 @@ const initDb = (databaseInstance, schemaFilePath) => {
             "storage",
             "stock",
             "min_stock",
+            "is_deleted",
+            "remarque"
           ]);
           const hasObsolete = cols.some((c) => !expectedCols.has(c.name));
           if (!hasObsolete) return;
@@ -136,7 +146,8 @@ const initDb = (databaseInstance, schemaFilePath) => {
                   storage TEXT,
                   stock INTEGER DEFAULT 0,
                   min_stock INTEGER DEFAULT 2,
-                  is_deleted INTEGER DEFAULT 0
+                  is_deleted INTEGER DEFAULT 0,
+                  remarque TEXT
                 )`,
                     (createErr) => {
                       if (createErr) {
@@ -149,8 +160,8 @@ const initDb = (databaseInstance, schemaFilePath) => {
                       }
 
                       databaseInstance.run(
-                        `INSERT OR IGNORE INTO products_new (id, category, brand, model, state, purchase_price, sale_price, min_sale_price, entry_date, cpu, ram, gpu, storage, stock, min_stock)
-                    SELECT id, category, brand, model, state, purchase_price, sale_price, min_sale_price, entry_date, cpu, ram, gpu, storage, stock, min_stock FROM products`,
+                        `INSERT OR IGNORE INTO products_new (id, category, brand, model, state, purchase_price, sale_price, min_sale_price, entry_date, cpu, ram, gpu, storage, stock, min_stock, is_deleted, remarque)
+                    SELECT id, category, brand, model, state, purchase_price, sale_price, min_sale_price, entry_date, cpu, ram, gpu, storage, stock, min_stock, is_deleted, remarque FROM products`,
                         (insErr) => {
                           if (insErr) {
                             console.error(
@@ -384,23 +395,25 @@ const initDb = (databaseInstance, schemaFilePath) => {
 
         // (Obsolete) Previously we removed a UNIQUE constraint on an obsolete
         // product column. That column is no longer used; no action required here.
-        // Créer un utilisateur admin par défaut si vide
-        databaseInstance.get('SELECT * FROM users WHERE login = "admin"', [], (err, row) => {
-          const crypto = require("crypto");
-          const hash = crypto
-            .createHash("sha256")
-            .update("admin")
-            .digest("hex");
+        // Migration: Sécurisation des accès (Utiliser bcryptjs au lieu de sha256)
+        databaseInstance.get('SELECT * FROM users WHERE login = "admin"', [], async (err, row) => {
+          const bcrypt = require("bcryptjs");
+          const defaultPass = "admin";
+          const saltRounds = 10;
+          
           if (!row) {
+            const hash = await bcrypt.hash(defaultPass, saltRounds);
             databaseInstance.run(
               "INSERT INTO users (name, login, hash, role, active) VALUES (?, ?, ?, ?, ?)",
               ["Administrateur", "admin", hash, "admin", 1],
             );
-          } else {
-            // On force la mise à jour au cas où le hash serait différent
-            databaseInstance.run('UPDATE users SET hash = ? WHERE login = "admin"', [hash]);
+            console.log("Système d'accès initialisé : admin / admin (Securely hashed)");
+          } else if (row.hash.length === 64) {
+            // Migration détectée : l'ancien hash est en SHA256 (64 hex chars)
+            console.log("Migration de sécurité : Conversion du hash admin vers bcrypt...");
+            const newHash = await bcrypt.hash(defaultPass, saltRounds);
+            databaseInstance.run('UPDATE users SET hash = ? WHERE login = "admin"', [newHash]);
           }
-          console.log("Système d'accès synchronisé : admin / admin");
 
           // Initialiser les données de base si la table products est vide (première installation)
           databaseInstance.get("SELECT COUNT(*) as count FROM products", (errCount, rowCount) => {
@@ -417,15 +430,27 @@ const initDb = (databaseInstance, schemaFilePath) => {
                   } else {
                     console.log("Données de base (seed) importées avec succès.");
                   }
-                  resolve(databaseInstance);
+                  
+                  // Integrity check after first init
+                  databaseInstance.get("PRAGMA integrity_check;", (ichkErr, ichkRow) => {
+                    console.log("Integrity Check Result:", ichkRow);
+                    resolve(databaseInstance);
+                  });
                 });
               } else {
                 console.warn("Fichier seed.sql introuvable, initialisation des données ignorée.", seedPath);
                 resolve(databaseInstance);
               }
             } else {
-              // La base de données contient déjà des produits ou erreur, on ne fait rien
-              resolve(databaseInstance);
+              // Integrity check on normal boot
+              databaseInstance.get("PRAGMA integrity_check;", (ichkErr, ichkRow) => {
+                if (ichkErr || !ichkRow || ichkRow.integrity_check !== "ok") {
+                    console.error("DATABASE INTEGRITY ERROR:", ichkErr || ichkRow);
+                } else {
+                    console.log("Database integrity verified: OK");
+                }
+                resolve(databaseInstance);
+              });
             }
           });
         });
@@ -438,7 +463,7 @@ const productionDbPath = app
   ? path.join(app.getPath("appData"), "it-manager-desktop", "inventory.db")
   : path.join(__dirname, "../../temp_test_db", "inventory.db"); // Fallback for non-Electron env
 
+const dbPath = productionDbPath;
 const db = createDbConnection(productionDbPath);
 
-
-module.exports = { createDbConnection, initDb, db, productionDbPath, schemaPath };
+module.exports = { createDbConnection, initDb, db, dbPath, productionDbPath, schemaPath };

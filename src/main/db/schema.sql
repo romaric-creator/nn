@@ -198,6 +198,16 @@ CREATE INDEX IF NOT EXISTS idx_sales_user ON sales(user_id);
 CREATE INDEX IF NOT EXISTS idx_user_logs_user ON user_logs(user_id);
 CREATE INDEX IF NOT EXISTS idx_price_audit_user ON price_audit_logs(user_id);
 
+-- INDEXES ADDITIONNELS POUR PERFORMANCES
+CREATE INDEX IF NOT EXISTS idx_products_stock ON products(stock);
+CREATE INDEX IF NOT EXISTS idx_products_category ON products(category);
+CREATE INDEX IF NOT EXISTS idx_sale_items_sale ON sale_items(sale_id);
+CREATE INDEX IF NOT EXISTS idx_sale_items_product ON sale_items(product_id);
+CREATE INDEX IF NOT EXISTS idx_invoice_items_invoice ON invoice_items(invoice_id);
+CREATE INDEX IF NOT EXISTS idx_audit_logs_entity ON audit_logs(entity, entity_id);
+CREATE INDEX IF NOT EXISTS idx_stock_movements_product ON stock_movements(product_id);
+CREATE INDEX IF NOT EXISTS idx_stock_movements_date ON stock_movements(date);
+
 -- Recherche stock par produit
 CREATE INDEX IF NOT EXISTS idx_stock_movements_product ON stock_movements(product_id);
 CREATE INDEX IF NOT EXISTS idx_product_units_product ON product_units(product_id);

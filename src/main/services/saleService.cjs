@@ -36,10 +36,12 @@ const SaleService = {
             for (const item of items) {
               const sellingPrice = item.selling_price || item.price;
               await new Promise((res, rej) => {
+                const originalPrice = item.original_price || item.price;
+                const priceModified = originalPrice !== sellingPrice ? 1 : 0;
                 db.run(
                   `INSERT INTO sale_items (sale_id, product_id, quantity, price, original_price, selling_price, price_modified)
                    VALUES (?, ?, ?, ?, ?, ?, ?)`,
-                  [saleId, item.product_id, item.quantity, sellingPrice, item.original_price, sellingPrice, item.original_price !== sellingPrice ? 1 : 0],
+                  [saleId, item.product_id, item.quantity, sellingPrice, originalPrice, sellingPrice, priceModified],
                   (err) => err ? rej(err) : res()
                 );
               });
@@ -98,7 +100,7 @@ const SaleService = {
               invoiceNumber,
               invoiceDate,
               sale: fullSaleData,
-              items: fullItemsData.map(i => ({...i, unit_price: i.selling_price}))
+              items: fullItemsData.map(i => ({ ...i, unit_price: i.selling_price }))
             };
 
             const html = await new Promise((res, rej) => InvoiceService.generateInvoiceHTML(invoiceDataForHtml, (err, h) => err ? rej(err) : res(h)));

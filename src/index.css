@@ -15,8 +15,8 @@
   --background: #f8fafc;
   --surface: #ffffff;
   --text-main: #0f172a;
-  --text-muted: #64748b;
-  --border: #e2e8f0;
+  --text-muted: #475569;
+  --border: #cbd5e1;
   --radius-sm: 0.5rem;
   --radius-md: 0.75rem;
   --radius-lg: 1rem;
@@ -74,9 +74,9 @@
   }
 
   .premium-input {
-    @apply w-full px-4 py-3 bg-white border border-slate-200 rounded-xl outline-none 
-           transition-all duration-200 placeholder:text-slate-400
-           focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 shadow-sm;
+    @apply w-full px-4 py-3 bg-white border border-slate-300 rounded-xl outline-none 
+           transition-all duration-200 placeholder:text-slate-500 text-slate-900 font-medium
+           focus:border-indigo-600 focus:ring-4 focus:ring-indigo-500/10 shadow-sm;
   }
 
   .card-hover {

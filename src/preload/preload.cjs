@@ -66,6 +66,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
       // Base de données
       "db:backup",
       "db:restore",
+      "db:status",
       "db:export-sql",
       // Unités
       "units:list",

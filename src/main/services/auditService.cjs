@@ -72,16 +72,26 @@ const AuditService = {
   },
 
   /**
-   * Insère une entrée dans audit_logs.
-   * action doit être en MAJUSCULES (ex: 'UPDATE', 'CREATE', 'DELETE', 'CHECKOUT', 'CANCEL')
+   * Insère une entrée dans audit_logs et purge les anciens logs.
    */
   logAudit: (entity, entityId, action, userId, oldValue, newValue) => {
+    const timestamp = new Date().toISOString();
+    
+    // 1. Insérer le nouveau log
     const sql = `
       INSERT INTO audit_logs (entity, entity_id, action, user_id, old_value, new_value, timestamp)
-      VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
+      VALUES (?, ?, ?, ?, ?, ?, ?)
     `;
-    db.run(sql, [entity, entityId, action.toUpperCase(), userId, oldValue, newValue], (err) => {
+    db.run(sql, [entity, entityId, action.toUpperCase(), userId, oldValue, newValue, timestamp], (err) => {
       if (err) console.error("Erreur audit_logs:", err.message);
+      
+      // 2. Rotation automatique (Purger les logs de plus de 365 jours pour performance)
+      const purgeDate = new Date();
+      purgeDate.setDate(purgeDate.getDate() - 365);
+      const purgeStr = purgeDate.toISOString();
+
+      db.run("DELETE FROM audit_logs WHERE timestamp < ?", [purgeStr]);
+      db.run("DELETE FROM user_logs WHERE timestamp < ?", [purgeStr]);
     });
   },
 

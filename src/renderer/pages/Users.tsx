@@ -85,6 +85,22 @@ export default function UsersPage() {
     }
   };
 
+  const [passModal, setPassModal] = useState({ open: false, userId: 0, userName: '', password: '' });
+
+  const handleUpdatePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!passModal.password) return;
+    try {
+      const res: any = await window.electronAPI.invoke('user:updatePassword', passModal.userId, passModal.password);
+      if (res.success) {
+        notify('success', 'Mot de passe mis à jour', `Le mot de passe de ${passModal.userName} a été réinitialisé.`);
+        setPassModal({ open: false, userId: 0, userName: '', password: '' });
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   if (loading && users.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] animate-pulse">
@@ -135,7 +151,7 @@ export default function UsersPage() {
             <form onSubmit={handleCreateUser} className="space-y-6 relative z-10">
               <div className="space-y-6">
                 <div>
-                  <label className="text-xs font-black uppercase tracking-widest text-slate-400 block mb-3 ml-1">Nom Complet</label>
+                  <label className="text-xs font-black uppercase tracking-widest text-slate-700 block mb-3 ml-1">Nom Complet</label>
                   <div className="relative group">
                     <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-indigo-600 transition-colors" size={18} />
                     <input
@@ -150,7 +166,7 @@ export default function UsersPage() {
                 </div>
 
                 <div>
-                  <label className="text-xs font-black uppercase tracking-widest text-slate-400 block mb-3 ml-1">Identifiant Système</label>
+                  <label className="text-xs font-black uppercase tracking-widest text-slate-700 block mb-3 ml-1">Identifiant Système</label>
                   <div className="relative group">
                     <Fingerprint className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-indigo-600 transition-colors" size={18} />
                     <input
@@ -165,7 +181,7 @@ export default function UsersPage() {
                 </div>
 
                 <div>
-                  <label className="text-xs font-black uppercase tracking-widest text-slate-400 block mb-3 ml-1">Mot De Passe Protegé</label>
+                  <label className="text-xs font-black uppercase tracking-widest text-slate-700 block mb-3 ml-1">Mot De Passe Protegé</label>
                   <div className="relative group">
                     <Key className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-indigo-600 transition-colors" size={18} />
                     <input
@@ -180,7 +196,7 @@ export default function UsersPage() {
                 </div>
 
                 <div>
-                  <label className="text-xs font-black uppercase tracking-widest text-slate-400 block mb-3 ml-1">Niveau d'Autorité</label>
+                  <label className="text-xs font-black uppercase tracking-widest text-slate-700 block mb-3 ml-1">Niveau d'Autorité</label>
                   <div className="grid grid-cols-2 gap-3 p-1.5 bg-slate-100 rounded-2xl border border-slate-200/50">
                      <button 
                        type="button"
@@ -224,71 +240,76 @@ export default function UsersPage() {
            </div>
 
            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-             {users.length === 0 ? (
-               <div className="col-span-full py-20 bg-white rounded-[1.5rem] border border-dashed border-slate-200 flex flex-col items-center justify-center text-center opacity-30">
-                  <Users size={48} className="mb-4" />
-                  <p className="font-black uppercase tracking-widest text-xs">Aucun agent configuré</p>
-               </div>
-             ) : (
-               users.map(u => (
-                 <div 
-                   key={u.id} 
-                   className={`p-6 bg-white border border-slate-100 rounded-[1.5rem] shadow-sm flex flex-col group transition-all duration-500 hover:shadow-2xl hover:shadow-indigo-600/5 hover:-translate-y-1 relative overflow-hidden ${u.active === 0 ? 'opacity-50 grayscale contrast-75' : ''}`}
-                 >
-                    {/* Header: Identity & Status */}
-                    <div className="flex items-start justify-between mb-6">
-                       <div className="flex items-center gap-4">
-                          <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-black text-xl italic shadow-lg ${u.role === 'admin' ? 'bg-gradient-to-br from-slate-800 to-slate-900 text-white' : 'bg-slate-100 text-slate-400'}`}>
-                             {u.name.charAt(0).toUpperCase()}
-                          </div>
-                          <div>
-                             <h3 className="font-black text-slate-900 tracking-tight leading-none mb-1.5 uppercase italic">{u.name}</h3>
-                             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest font-mono">ID: {u.login}</p>
-                          </div>
-                       </div>
-                       
-                       <div className="flex flex-col items-center gap-1.5">
-                          <div className={`w-2.5 h-2.5 rounded-full ${u.active ? 'bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.5)] animate-pulse' : 'bg-rose-500'}`}></div>
-                          <span className="text-[8px] font-black uppercase text-slate-400">{u.active ? 'En Ligne' : 'Bloqué'}</span>
-                       </div>
-                    </div>
+              {users.map(u => (
+                <div 
+                  key={u.id} 
+                  className={`p-6 bg-white border border-slate-100 rounded-[1.5rem] shadow-sm flex flex-col group transition-all duration-500 hover:shadow-2xl hover:shadow-indigo-600/5 hover:-translate-y-1 relative overflow-hidden ${u.active === 0 ? 'opacity-50 grayscale contrast-75' : ''}`}
+                >
+                   {/* Header: Identity & Status */}
+                   <div className="flex items-start justify-between mb-6">
+                      <div className="flex items-center gap-4">
+                         <div className={`w-14 h-14 rounded-2xl flex items-center justify-center font-black text-xl italic shadow-lg ${u.role === 'admin' ? 'bg-gradient-to-br from-slate-800 to-slate-900 text-white' : 'bg-slate-100 text-slate-400'}`}>
+                            {u.name.charAt(0).toUpperCase()}
+                         </div>
+                         <div>
+                            <h3 className="font-black text-slate-900 tracking-tight leading-none mb-1.5 uppercase italic">{u.name}</h3>
+                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest font-mono">ID: {u.login}</p>
+                         </div>
+                      </div>
+                      
+                      <div className="flex flex-col items-center gap-1.5">
+                         <div className={`w-2.5 h-2.5 rounded-full ${u.active ? 'bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.5)] animate-pulse' : 'bg-rose-500'}`}></div>
+                         <span className="text-[8px] font-black uppercase text-slate-400">{u.active ? 'En Ligne' : 'Bloqué'}</span>
+                      </div>
+                   </div>
 
-                    {/* Role & Privileges */}
-                    <div className="flex-1 space-y-6">
-                       <div className="flex items-center justify-between px-2">
-                          <div className="flex items-center gap-2">
-                             <ShieldCheck size={14} className={u.role === 'admin' ? "text-indigo-600" : "text-slate-400"} />
-                             <span className={`text-[10px] font-black uppercase tracking-widest ${u.role === 'admin' ? "text-indigo-600" : "text-slate-500"}`}>
-                               Habilitation: {u.role === 'admin' ? "Full Administrator" : "Limited Seller Account"}
-                             </span>
-                          </div>
-                       </div>
-                       
-                       <div className="h-px bg-slate-50 w-full"></div>
-                       
-                       {/* Footer: Actions */}
-                       <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                             <div className="p-2 bg-slate-50 rounded-lg text-slate-400 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-all">
-                                <Activity size={14} />
-                             </div>
-                             <span className="text-[9px] font-bold text-slate-400 uppercase">Activité tracée</span>
-                          </div>
-                          
-                          {u.active === 1 && u.login !== 'admin' && (
-                            <button 
-                              onClick={() => handleDeactivate(u.id)}
-                              className="p-3 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-all opacity-0 group-hover:opacity-100"
-                              title="Révoquer l'accès"
-                            >
-                              <UserX size={18} />
-                            </button>
-                          )}
-                       </div>
-                    </div>
-                 </div>
-               ))
-             )}
+                   {/* Role & Privileges */}
+                   <div className="flex-1 space-y-6">
+                      <div className="flex items-center justify-between px-2">
+                         <div className="flex items-center gap-2">
+                            <ShieldCheck size={14} className={u.role === 'admin' ? "text-indigo-600" : "text-slate-400"} />
+                            <span className={`text-[10px] font-black uppercase tracking-widest ${u.role === 'admin' ? "text-indigo-600" : "text-slate-700"}`}>
+                              Habilitation: {u.role === 'admin' ? "Full Administrator" : "Limited Seller Account"}
+                            </span>
+                         </div>
+                      </div>
+                      
+                      <div className="h-px bg-slate-50 w-full"></div>
+                      
+                      {/* Footer: Actions */}
+                      <div className="flex items-center justify-between">
+                         <div className="flex items-center gap-2">
+                            <div className="p-2 bg-slate-50 rounded-lg text-slate-400 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-all">
+                               <Activity size={14} />
+                            </div>
+                            <span className="text-[9px] font-bold text-slate-400 uppercase">Activité tracée</span>
+                         </div>
+                         
+                         <div className="flex items-center gap-1">
+                            {u.active === 1 && (
+                              <button 
+                                onClick={() => setPassModal({ open: true, userId: u.id, userName: u.name, password: '' })}
+                                className="p-3 text-slate-300 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all opacity-0 group-hover:opacity-100"
+                                title="Réinitialiser le mot de passe"
+                              >
+                                <Lock size={18} />
+                              </button>
+                            )}
+
+                            {u.active === 1 && u.login !== 'admin' && (
+                              <button 
+                                onClick={() => handleDeactivate(u.id)}
+                                className="p-3 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-all opacity-0 group-hover:opacity-100"
+                                title="Révoquer l'accès"
+                              >
+                                <UserX size={18} />
+                              </button>
+                            )}
+                         </div>
+                      </div>
+                   </div>
+                </div>
+              ))}
            </div>
            
            {/* System Information Box */}
@@ -298,7 +319,7 @@ export default function UsersPage() {
                  <Shield className="text-indigo-400" size={32} />
               </div>
               <div className="relative z-10">
-                 <h4 className="text-white font-black text-xs uppercase tracking-[0.2em] mb-1 italic">Vérification d'accès cryptographique</h4>
+                 <h4 className="text-white font-black text-xs uppercase tracking-[0.2em] mb-1 italic">Vérification cryptographique</h4>
                  <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest leading-relaxed">
                    Tous les mots de passe sont hachés via Argon2ID avant stockage local. <br />
                    La révocation prend effet instantanément sur toutes les sessions actives.
@@ -307,6 +328,69 @@ export default function UsersPage() {
            </div>
         </div>
       </div>
+
+      {/* Password Reset Modal */}
+      {passModal.open && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[999] flex items-center justify-center p-4 animate-in fade-in duration-300">
+          <div className="bg-white rounded-[2rem] w-full max-w-md shadow-2xl overflow-hidden animate-in zoom-in-95 duration-500">
+             <div className="p-8 bg-slate-900 text-white relative">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-3xl"></div>
+                <div className="relative z-10 flex items-center gap-4">
+                   <div className="w-12 h-12 rounded-xl bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                      <Lock size={20} />
+                   </div>
+                   <div>
+                      <h3 className="text-xl font-black uppercase italic tracking-tighter">Sécurité Compte</h3>
+                      <p className="text-slate-400 font-bold text-[9px] uppercase tracking-widest mt-1">Réinitialisation d'accès</p>
+                   </div>
+                </div>
+                <button 
+                  onClick={() => setPassModal({ ...passModal, open: false })}
+                  className="absolute top-8 right-8 text-slate-500 hover:text-white transition-colors"
+                >
+                  <ArrowRight size={20} />
+                </button>
+             </div>
+
+             <form onSubmit={handleUpdatePassword} className="p-8 space-y-6">
+                <div>
+                  <p className="text-slate-500 text-xs font-medium mb-6">
+                    Vous modifiez l'accès pour l'utilisateur <span className="text-slate-900 font-black uppercase italic">{passModal.userName}</span>.
+                  </p>
+                  <label className="text-[10px] font-black text-slate-700 uppercase tracking-widest block mb-3 ml-1">Nouveau Password</label>
+                  <div className="relative group">
+                    <Key className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-indigo-600 transition-colors" size={18} />
+                    <input 
+                      type="password"
+                      required
+                      autoFocus
+                      placeholder="••••••••••••"
+                      className="premium-input pl-12"
+                      value={passModal.password}
+                      onChange={(e) => setPassModal({...passModal, password: e.target.value})}
+                    />
+                  </div>
+                </div>
+
+                <div className="flex gap-3 pt-2">
+                   <button 
+                    type="button"
+                    onClick={() => setPassModal({ ...passModal, open: false })}
+                    className="flex-1 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-600 transition-all"
+                   >
+                     Annuler
+                   </button>
+                   <button 
+                    type="submit"
+                    className="flex-[2] premium-btn-primary py-4 rounded-xl shadow-indigo-100"
+                   >
+                     Mettre à Jour
+                   </button>
+                </div>
+             </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

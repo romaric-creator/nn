@@ -26,7 +26,30 @@ function createWindow() {
 }
 
 app.whenReady().then(async () => {
+  const fs = require('fs');
+  const { dbPath } = require("./db/database.cjs");
+  const initMarker = path.join(app.getPath("appData"), "it-manager-desktop", ".initialized");
+
+  // Logique de "Premier Démarrage" : si le marqueur n'existe pas, on repart à zéro
+  // mais on garde une trace de l'ancienne base au cas où (backup).
+  if (!fs.existsSync(initMarker)) {
+    if (fs.existsSync(dbPath)) {
+      const backupPath = dbPath + ".old_" + Date.now();
+      fs.renameSync(dbPath, backupPath);
+      console.log("Premier démarrage détecté. Ancienne base renommée en :", backupPath);
+    }
+    // Créer le marqueur pour les prochains démarrages
+    const dir = path.dirname(initMarker);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(initMarker, new Date().toISOString());
+  }
+
   await initDb(db, schemaPath);
+  
+  // Automated Daily Backup
+  const BackupService = require("./services/backupService.cjs");
+  BackupService.autoBackup();
+
   createWindow();
   // Menu natif minimal (exemple)
   const menu = Menu.buildFromTemplate([
@@ -52,5 +75,6 @@ require("./ipc/sale.cjs");
 require("./ipc/stock.cjs");
 require("./ipc/user.cjs");
 require("./ipc/backup.cjs");
+require("./ipc/db.cjs");
 require("./ipc/audit.cjs");
 require("./ipc/invoice.cjs");

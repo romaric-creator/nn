@@ -7,8 +7,6 @@ import {
   ChevronDown,
   X,
   Plus,
-  Edit2,
-  Check,
   Package,
   Zap,
   CreditCard,
@@ -27,6 +25,11 @@ type Product = {
   purchase_price: number;
   stock: number;
   state: string;
+  remarque?: string;
+  cpu?: string;
+  ram?: string;
+  gpu?: string;
+  storage?: string;
 };
 
 type SaleItem = {
@@ -36,6 +39,7 @@ type SaleItem = {
   original_price?: number;
   selling_price?: number;
   model: string;
+  brand: string;
 };
 
 type Customer = { id: number; name: string; phone: string };
@@ -56,9 +60,8 @@ export default function Sales() {
   const [showAddCustomerModal, setShowAddCustomerModal] = useState(false);
   const [newCustomerName, setNewCustomerName] = useState("");
   const [newCustomerPhone, setNewCustomerPhone] = useState("");
-  const [editingPriceId, setEditingPriceId] = useState<number | null>(null);
-  const [editingPriceValue, setEditingPriceValue] = useState<number>(0);
   const [loading, setLoading] = useState(false);
+  const [showCart, setShowCart] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>("Toutes");
   const [allCategories, setAllCategories] = useState<string[]>([]);
   
@@ -120,6 +123,7 @@ export default function Sales() {
           original_price: product.sale_price ?? 0,
           selling_price: product.sale_price ?? 0,
           model: product.model,
+          brand: product.brand,
         },
       ]);
     }
@@ -272,6 +276,18 @@ export default function Sales() {
            >
               <Zap size={20} className={loading ? "animate-pulse" : ""} />
            </button>
+
+           <button 
+             onClick={() => setShowCart(!showCart)}
+             className="xl:hidden p-3 bg-indigo-600 text-white rounded-xl shadow-lg shadow-indigo-600/20 relative"
+           >
+              <ShoppingCart size={20} />
+              {cart.length > 0 && (
+                <span className="absolute -top-1 -right-1 w-5 h-5 bg-rose-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white">
+                  {cart.reduce((s, i) => s + i.quantity, 0)}
+                </span>
+              )}
+           </button>
         </div>
       </div>
 
@@ -357,8 +373,18 @@ export default function Sales() {
         </div>
 
         {/* Right Section: Cart / Summary */}
-        <div className="w-[320px] md:w-[360px] lg:w-[420px] flex flex-col gap-6 relative shrink-0">
-           <div className="flex-1 glass-card rounded-[1.5rem] flex flex-col overflow-hidden border-slate-200/60 shadow-2xl shadow-slate-200/50">
+        <div className={`
+          fixed inset-0 z-[60] xl:relative xl:z-0 xl:w-[320px] md:xl:w-[360px] lg:xl:w-[420px] 
+          flex flex-col gap-6 transition-all duration-500 ease-in-out
+          ${showCart ? "translate-x-0" : "translate-x-full xl:translate-x-0"}
+        `}>
+          {/* Mobile Close Backdrop */}
+          <div 
+            className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm xl:hidden -z-10"
+            onClick={() => setShowCart(false)}
+          />
+          
+          <div className="flex-1 glass-card rounded-[1.5rem] xl:rounded-3xl flex flex-col overflow-hidden border-slate-200/60 shadow-2xl h-full m-4 xl:m-0">
               {/* Cart Header */}
               <div className="p-6 bg-slate-900 text-white rounded-b-[2rem] relative overflow-hidden">
                 {/* Background decoration */}
@@ -388,8 +414,10 @@ export default function Sales() {
                     <div key={i.product_id} className="p-5 bg-white border border-slate-100 rounded-3xl flex flex-col gap-4 group hover:border-indigo-100 transition-all">
                       <div className="flex items-start justify-between gap-3">
                          <div className="flex-1 min-w-0">
-                           <h4 className="font-bold text-slate-800 text-sm truncate uppercase tracking-tight">{i.model}</h4>
-                           {(i.original_price || 0) !== (i.selling_price || i.price) && (
+                           <h4 className="font-black text-slate-900 text-sm uppercase tracking-tight">
+                             {i.brand || ""} {i.model}
+                           </h4>
+                           {((i.original_price || 0) !== (i.selling_price || i.price) && (i.original_price || 0) > 0) && (
                              <span className="inline-flex items-center gap-1 mt-1 text-[9px] font-black text-rose-500 uppercase tracking-widest bg-rose-50 px-2 py-0.5 rounded-full border border-rose-100">
                                <Zap size={8} /> Prix Manuel
                              </span>
@@ -417,33 +445,17 @@ export default function Sales() {
                         </div>
 
                         <div className="flex items-center gap-2">
-                           {editingPriceId === i.product_id ? (
-                             <div className="flex gap-1">
-                               <input 
-                                 type="number"
-                                 autoFocus
-                                 value={editingPriceValue}
-                                 onChange={(e) => setEditingPriceValue(parseFloat(e.target.value) || 0)}
-                                 className="w-24 px-2 py-1 border border-indigo-400 rounded-lg text-right font-black text-sm outline-none"
-                               />
-                               <button onClick={() => updatePrice(i.product_id, editingPriceValue)} className="p-1 bg-indigo-600 text-white rounded-lg shadow-md"><Check size={14} /></button>
-                             </div>
-                           ) : (
-                             <div className="flex items-center gap-2">
-                               <span className="font-black text-slate-800 tracking-tight">
-                                 {((i.selling_price || i.price) * i.quantity).toLocaleString()} <span className="text-[10px] text-slate-400 uppercase">CFA</span>
-                               </span>
-                               <button 
-                                 onClick={() => {
-                                   setEditingPriceId(i.product_id);
-                                   setEditingPriceValue(i.selling_price || i.price);
-                                 }}
-                                 className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
-                               >
-                                 <Edit2 size={14} />
-                               </button>
-                             </div>
-                           )}
+                           <div className="flex flex-col items-end">
+                             <input 
+                               type="number"
+                               value={i.selling_price || i.price}
+                               onChange={(e) => updatePrice(i.product_id, parseFloat(e.target.value) || 0)}
+                               className="w-24 px-2 py-1 bg-slate-50 border border-slate-100 rounded-lg text-right font-black text-sm outline-none focus:border-indigo-400 focus:bg-white transition-all"
+                             />
+                             <span className="text-[10px] text-slate-400 uppercase font-bold tracking-tight mt-1">
+                               Total: {((i.selling_price || i.price) * i.quantity).toLocaleString()} CFA
+                             </span>
+                           </div>
                         </div>
                       </div>
                     </div>

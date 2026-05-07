@@ -59,7 +59,7 @@ const InvoiceService = {
             // Récupérer les items de la vente
             const items = await new Promise((res, rej) => {
               db.all(
-                `SELECT si.*, p.model, p.brand, p.state
+                `SELECT si.*, p.model, p.brand, p.state, p.cpu, p.ram, p.gpu, p.storage
                  FROM sale_items si
                  LEFT JOIN products p ON si.product_id = p.id
                  WHERE si.sale_id = ?`,
@@ -185,7 +185,12 @@ const InvoiceService = {
       .map(
         (item) => `
       <tr>
-        <td>${item.brand} ${item.model} ${item.state || ""}</td>
+        <td>
+          <div style="font-weight: bold;">${item.brand} ${item.model} ${item.state || ""}</div>
+          ${item.cpu ? `<div style="font-size: 8px; color: #666;">• CPU: ${item.cpu} ${item.ram ? `| RAM: ${item.ram}` : ''}</div>` : ''}
+          ${item.gpu ? `<div style="font-size: 8px; color: #666;">• GPU: ${item.gpu}</div>` : ''}
+          ${item.storage ? `<div style="font-size: 8px; color: #666;">• Disk: ${item.storage}</div>` : ''}
+        </td>
         <td class="qty">${item.quantity}</td>
         <td class="price">${(item.unit_price || 0).toLocaleString("fr-FR", {
           minimumFractionDigits: 2,
@@ -423,7 +428,7 @@ const InvoiceService = {
         if (!invoice) return callback(new Error("Facture non trouvée"));
 
         db.all(
-          `SELECT ii.*, p.brand, p.model, p.state
+          `SELECT ii.*, p.brand, p.model, p.state, p.cpu, p.ram, p.gpu, p.storage
            FROM invoice_items ii
            LEFT JOIN products p ON ii.product_id = p.id
            WHERE ii.invoice_id = ?`,

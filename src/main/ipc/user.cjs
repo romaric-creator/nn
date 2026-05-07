@@ -46,3 +46,12 @@ ipcMain.handle('user:logAction', async (event, user_id, action) => {
 		});
 	});
 });
+
+ipcMain.handle('user:updatePassword', async (event, userId, newPassword) => {
+	return new Promise((resolve) => {
+		UserService.updatePassword(userId, newPassword, (err) => {
+			if (err) resolve({ success: false, message: err.message });
+			else resolve({ success: true });
+		});
+	});
+});
