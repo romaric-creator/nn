@@ -11,7 +11,7 @@ try {
 }
 
 // Determine if we are packaged
-const isPackaged = process.env.NODE_ENV === 'production';
+const isPackaged = app ? app.isPackaged : false;
 
 const schemaPath = isPackaged
   ? path.join(process.resourcesPath, "schema.sql")
@@ -418,7 +418,7 @@ const initDb = (databaseInstance, schemaFilePath) => {
           // Initialiser les données de base si la table products est vide (première installation)
           databaseInstance.get("SELECT COUNT(*) as count FROM products", (errCount, rowCount) => {
             if (!errCount && rowCount && rowCount.count === 0) {
-              const seedPath = app && app.isPackaged
+              const seedPath = isPackaged
                 ? path.join(process.resourcesPath, "seed.sql")
                 : path.join(__dirname, "../../../seed.sql");
                 
