@@ -1,4 +1,4 @@
-const { db } = require("../db/database.cjs");
+const { getDb } = require("../db/database.cjs");
 const logger = require("./loggingService.cjs");
 
 const InvoiceService = {
@@ -11,7 +11,7 @@ const InvoiceService = {
     const month = String(now.getMonth() + 1).padStart(2, "0");
     const dayPrefix = `${year}${month}`;
 
-    db.get(
+    getDb().get(
       `SELECT COUNT(*) as count FROM invoices
        WHERE invoice_number LIKE ? OR strftime('%Y%m', invoice_date) = ?`,
       [`IN-${dayPrefix}%`, dayPrefix],
@@ -29,11 +29,11 @@ const InvoiceService = {
    */
   createInvoiceFromSale: (saleId) => {
     return new Promise((resolve, reject) => {
-      db.serialize(() => {
+      getDb().serialize(() => {
         (async () => {
           try {
             await new Promise((res, rej) => {
-              db.run("BEGIN TRANSACTION", (err) => {
+              getDb().run("BEGIN TRANSACTION", (err) => {
                 if (err) rej(err);
                 else res();
               });
@@ -41,7 +41,7 @@ const InvoiceService = {
 
             // Récupérer les détails de la vente
             const sale = await new Promise((res, rej) => {
-              db.get(
+              getDb().get(
                 `SELECT s.*, c.name as customer_name, u.name as user_name
                  FROM sales s
                  LEFT JOIN customers c ON s.customer_id = c.id
@@ -58,7 +58,7 @@ const InvoiceService = {
 
             // Récupérer les items de la vente
             const items = await new Promise((res, rej) => {
-              db.all(
+              getDb().all(
                 `SELECT si.*, p.model, p.brand, p.state, p.cpu, p.ram, p.gpu, p.storage
                  FROM sale_items si
                  LEFT JOIN products p ON si.product_id = p.id
@@ -85,7 +85,7 @@ const InvoiceService = {
 
             // Créer la facture
             const invoiceInsertResult = await new Promise((res, rej) => {
-              db.run(
+              getDb().run(
                 `INSERT INTO invoices
                  (sale_id, invoice_number, invoice_date, customer_id, total_amount, discount_amount, payment_method, status)
                  VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -112,7 +112,7 @@ const InvoiceService = {
               const itemTotal =
                 (item.selling_price || item.price) * item.quantity;
               await new Promise((res, rej) => {
-                db.run(
+                getDb().run(
                   `INSERT INTO invoice_items
                    (invoice_id, product_id, quantity, unit_price, item_total)
                    VALUES (?, ?, ?, ?, ?)`,
@@ -132,7 +132,7 @@ const InvoiceService = {
             }
 
             await new Promise((res, rej) => {
-              db.run("COMMIT", (err) => {
+              getDb().run("COMMIT", (err) => {
                 if (err) rej(err);
                 else res();
               });
@@ -151,7 +151,7 @@ const InvoiceService = {
               items,
             });
           } catch (error) {
-            db.run("ROLLBACK", (rollbackErr) => {
+            getDb().run("ROLLBACK", (rollbackErr) => {
               if (rollbackErr) {
                 logger.error("Erreur lors du ROLLBACK de la facture", {
                   rollbackErr,
@@ -197,11 +197,11 @@ const InvoiceService = {
           maximumFractionDigits: 2,
         })}</td>
         <td class="price">${(
-          (item.unit_price || 0) * item.quantity
-        ).toLocaleString("fr-FR", {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        })}</td>
+            (item.unit_price || 0) * item.quantity
+          ).toLocaleString("fr-FR", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })}</td>
       </tr>
     `,
       )
@@ -342,16 +342,15 @@ const InvoiceService = {
             <div><strong>Date:</strong> ${new Date(invoiceDate).toLocaleDateString("fr-FR")}</div>
           </div>
 
-          ${
-            sale.customer_name
-              ? `
+          ${sale.customer_name
+        ? `
           <div class="customer-section">
             <div class="customer-label">CLIENT:</div>
             <div class="customer-name">${sale.customer_name}</div>
           </div>
           `
-              : ""
-          }
+        : ""
+      }
 
           <table class="items-table">
             <thead>
@@ -371,29 +370,28 @@ const InvoiceService = {
             <div class="total-row subtotal">
               <span>SOUS-TOTAL:</span>
               <span>${subtotal.toLocaleString("fr-FR", {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              })} CFA</span>
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      })} CFA</span>
             </div>
-            ${
-              discountAmount > 0
-                ? `
+            ${discountAmount > 0
+        ? `
             <div class="total-row discount">
               <span>REMISE:</span>
               <span>-${discountAmount.toLocaleString("fr-FR", {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              })} CFA</span>
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        })} CFA</span>
             </div>
             `
-                : ""
-            }
+        : ""
+      }
             <div class="total-row grand-total">
               <span>MONTANT TOTAL:</span>
               <span>${total.toLocaleString("fr-FR", {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              })} CFA</span>
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      })} CFA</span>
             </div>
           </div>
 
@@ -420,14 +418,14 @@ const InvoiceService = {
    * Récupère une facture par ID avec tous ses détails
    */
   getInvoiceById: (invoiceId, callback) => {
-    db.get(
+    getDb().get(
       `SELECT i.*, c.name as customer_name FROM invoices i LEFT JOIN customers c ON i.customer_id = c.id WHERE i.id = ?`,
       [invoiceId],
       (err, invoice) => {
         if (err) return callback(err);
         if (!invoice) return callback(new Error("Facture non trouvée"));
 
-        db.all(
+        getDb().all(
           `SELECT ii.*, p.brand, p.model, p.state, p.cpu, p.ram, p.gpu, p.storage
            FROM invoice_items ii
            LEFT JOIN products p ON ii.product_id = p.id
@@ -446,7 +444,7 @@ const InvoiceService = {
    * Liste tous les factures
    */
   getInvoices: (callback) => {
-    db.all(
+    getDb().all(
       `SELECT i.*, c.name as customer_name, COUNT(ii.id) as item_count
        FROM invoices i
        LEFT JOIN customers c ON i.customer_id = c.id
@@ -465,7 +463,7 @@ const InvoiceService = {
    * Récupère tous les factures d'un client spécifique
    */
   getInvoicesByCustomerId: (customerId, callback) => {
-    db.all(
+    getDb().all(
       `SELECT i.*, COUNT(ii.id) as item_count
        FROM invoices i
        LEFT JOIN invoice_items ii ON i.id = ii.invoice_id

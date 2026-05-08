@@ -1,4 +1,4 @@
-const { db } = require("../db/database.cjs");
+const { getDb } = require("../db/database.cjs");
 const logger = require("./loggingService.cjs");
 const InvoiceService = require("./invoiceService.cjs");
 const AuditService = require("./auditService.cjs");
@@ -11,11 +11,11 @@ const SaleService = {
    */
   checkout: (sale, items) => {
     return new Promise((resolve, reject) => {
-      db.serialize(() => {
+      getDb().serialize(() => {
         (async () => {
           let saleId, invoiceId;
           try {
-            await new Promise((res, rej) => db.run("BEGIN TRANSACTION", (err) => err ? rej(err) : res()));
+            await new Promise((res, rej) => getDb().run("BEGIN TRANSACTION", (err) => err ? rej(err) : res()));
 
             // 1. Créer la vente (sales)
             const dateStr = new Date().toISOString();
@@ -24,7 +24,7 @@ const SaleService = {
             const discountType = sale.discount_type || "fixed";
 
             saleId = await new Promise((res, rej) => {
-              db.run(
+              getDb().run(
                 `INSERT INTO sales (date, user_id, customer_id, total, payment_method, discount_amount, discount_type)
                  VALUES (?, ?, ?, ?, ?, ?, ?)`,
                 [dateStr, sale.user_id, sale.customer_id, total, sale.payment_method, discountAmount, discountType],
@@ -38,7 +38,7 @@ const SaleService = {
               await new Promise((res, rej) => {
                 const originalPrice = item.original_price || item.price;
                 const priceModified = originalPrice !== sellingPrice ? 1 : 0;
-                db.run(
+                getDb().run(
                   `INSERT INTO sale_items (sale_id, product_id, quantity, price, original_price, selling_price, price_modified)
                    VALUES (?, ?, ?, ?, ?, ?, ?)`,
                   [saleId, item.product_id, item.quantity, sellingPrice, originalPrice, sellingPrice, priceModified],
@@ -47,7 +47,7 @@ const SaleService = {
               });
 
               await new Promise((res, rej) => {
-                db.run(
+                getDb().run(
                   `UPDATE products SET stock = stock - ? WHERE id = ? AND stock >= ?`,
                   [item.quantity, item.product_id, item.quantity],
                   function (err) {
@@ -63,7 +63,7 @@ const SaleService = {
             const invoiceDate = dateStr.split('T')[0];
 
             invoiceId = await new Promise((res, rej) => {
-              db.run(
+              getDb().run(
                 `INSERT INTO invoices (sale_id, invoice_number, invoice_date, customer_id, total_amount, discount_amount, payment_method, status)
                  VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
                 [saleId, invoiceNumber, invoiceDate, sale.customer_id, total, discountAmount, sale.payment_method, "paid"],
@@ -75,7 +75,7 @@ const SaleService = {
             for (const item of items) {
               const itemTotal = (item.selling_price || item.price) * item.quantity;
               await new Promise((res, rej) => {
-                db.run(
+                getDb().run(
                   `INSERT INTO invoice_items (invoice_id, product_id, quantity, unit_price, item_total)
                    VALUES (?, ?, ?, ?, ?)`,
                   [invoiceId, item.product_id, item.quantity, item.selling_price || item.price, itemTotal],
@@ -84,15 +84,15 @@ const SaleService = {
               });
             }
 
-            await new Promise((res, rej) => db.run("COMMIT", (err) => err ? rej(err) : res()));
+            await new Promise((res, rej) => getDb().run("COMMIT", (err) => err ? rej(err) : res()));
 
             // 5. Post-transaction: Générer le HTML
             const fullSaleData = await new Promise((res, rej) => {
-              db.get(`SELECT s.*, c.name as customer_name FROM sales s LEFT JOIN customers c ON s.customer_id = c.id WHERE s.id = ?`, [saleId], (err, row) => err ? rej(err) : res(row));
+              getDb().get(`SELECT s.*, c.name as customer_name FROM sales s LEFT JOIN customers c ON s.customer_id = c.id WHERE s.id = ?`, [saleId], (err, row) => err ? rej(err) : res(row));
             });
 
             const fullItemsData = await new Promise((res, rej) => {
-              db.all(`SELECT si.*, p.model, p.brand, p.state FROM sale_items si JOIN products p ON si.product_id = p.id WHERE si.sale_id = ?`, [saleId], (err, rows) => err ? rej(err) : res(rows));
+              getDb().all(`SELECT si.*, p.model, p.brand, p.state FROM sale_items si JOIN products p ON si.product_id = p.id WHERE si.sale_id = ?`, [saleId], (err, rows) => err ? rej(err) : res(rows));
             });
 
             const invoiceDataForHtml = {
@@ -116,7 +116,7 @@ const SaleService = {
             resolve({ success: true, saleId, invoiceId, html });
 
           } catch (error) {
-            await new Promise((res) => db.run("ROLLBACK", () => res()));
+            await new Promise((res) => getDb().run("ROLLBACK", () => res()));
             logger.error("Erreur de checkout, ROLLBACK effectué", { error: error.message, saleData: sale });
             reject(error);
           }
@@ -127,11 +127,11 @@ const SaleService = {
 
   createSale: (sale, items) => {
     return new Promise((resolve, reject) => {
-      db.serialize(() => { // db.serialize is kept for serialization
+      getDb().serialize(() => { // getDb().serialize is kept for serialization
         (async () => { // Self-executing async function
           try {
             await new Promise((res, rej) => {
-              db.run("BEGIN TRANSACTION", (err) => {
+              getDb().run("BEGIN TRANSACTION", (err) => {
                 if (err) rej(err);
                 else res();
               });
@@ -162,7 +162,7 @@ const SaleService = {
             const discountType = sale.discount_type || "fixed";
 
             const saleInsertResult = await new Promise((res, rej) => {
-              db.run(
+              getDb().run(
                 `INSERT INTO sales (date, user_id, customer_id, total, payment_method, payment_provider, transaction_id, discount_amount, discount_type, discount)
                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                 [
@@ -188,7 +188,7 @@ const SaleService = {
 
             if (items.length === 0) {
               await new Promise((res, rej) => {
-                db.run("COMMIT", (err) => {
+                getDb().run("COMMIT", (err) => {
                   if (err) rej(err);
                   else res();
                 });
@@ -203,7 +203,7 @@ const SaleService = {
               const priceModified = originalPrice !== sellingPrice ? 1 : 0;
 
               const saleItemInsertResult = await new Promise((res, rej) => {
-                db.run(
+                getDb().run(
                   `INSERT INTO sale_items (sale_id, product_id, quantity, price, original_price, selling_price, price_modified)
                    VALUES (?, ?, ?, ?, ?, ?, ?)`,
                   [
@@ -225,7 +225,7 @@ const SaleService = {
 
               if (priceModified) {
                 await new Promise((res, rej) => {
-                  db.run(
+                  getDb().run(
                     `INSERT INTO price_audit_logs (sale_item_id, user_id, original_price, modified_price, reason, timestamp)
                      VALUES (?, ?, ?, ?, ?, datetime('now'))`,
                     [
@@ -246,7 +246,7 @@ const SaleService = {
               }
 
               const stockUpdateResult = await new Promise((res, rej) => {
-                db.run(
+                getDb().run(
                   `UPDATE products SET stock = stock - ? WHERE id = ? AND stock >= ?`,
                   [item.quantity, item.product_id, item.quantity],
                   function (err) {
@@ -267,7 +267,7 @@ const SaleService = {
             }
 
             await new Promise((res, rej) => {
-              db.run("COMMIT", (err) => {
+              getDb().run("COMMIT", (err) => {
                 if (err) rej(err);
                 else res();
               });
@@ -284,7 +284,7 @@ const SaleService = {
             });
             resolve(saleId);
           } catch (error) {
-            db.run("ROLLBACK", (rollbackErr) => {
+            getDb().run("ROLLBACK", (rollbackErr) => {
               if (rollbackErr) {
                 logger.error("Erreur lors du ROLLBACK de la vente", {
                   rollbackErr,
@@ -304,25 +304,25 @@ const SaleService = {
   },
   cancelSale: (saleId, callback) => {
 
-    db.serialize(() => {
-      db.run("BEGIN TRANSACTION");
+    getDb().serialize(() => {
+      getDb().run("BEGIN TRANSACTION");
       // Vérifier si déjà annulée
-      db.get("SELECT status FROM sales WHERE id = ?", [saleId], (sErr, row) => {
+      getDb().get("SELECT status FROM sales WHERE id = ?", [saleId], (sErr, row) => {
         if (sErr) {
-          db.run("ROLLBACK");
+          getDb().run("ROLLBACK");
           return callback(sErr);
         }
         if (row && row.status === "cancelled") {
-          db.run("ROLLBACK");
+          getDb().run("ROLLBACK");
           return callback(null);
         }
 
-        db.all(
+        getDb().all(
           "SELECT * FROM sale_items WHERE sale_id = ?",
           [saleId],
           (err, items) => {
             if (err) {
-              db.run("ROLLBACK");
+              getDb().run("ROLLBACK");
               logger.error(
                 "Erreur lors de la recherche des articles pour annulation de vente",
                 { error: err.message, saleId },
@@ -333,15 +333,15 @@ const SaleService = {
             let hasError = false;
             if (!items || items.length === 0) {
               // Même si pas d'items, marquer cancelled
-              db.run(
+              getDb().run(
                 "UPDATE sales SET status = ? WHERE id = ?",
                 ["cancelled", saleId],
                 (err2) => {
                   if (err2) {
-                    db.run("ROLLBACK");
+                    getDb().run("ROLLBACK");
                     return callback(err2);
                   }
-                  db.run("COMMIT", (commitErr) => {
+                  getDb().run("COMMIT", (commitErr) => {
                     if (commitErr) {
                       return callback(commitErr);
                     }
@@ -353,13 +353,13 @@ const SaleService = {
               return;
             }
             items.forEach((item) => {
-              db.run(
+              getDb().run(
                 "UPDATE products SET stock = stock + ? WHERE id = ?",
                 [item.quantity, item.product_id],
                 function (uErr) {
                   if (uErr && !hasError) {
                     hasError = true;
-                    db.run("ROLLBACK");
+                    getDb().run("ROLLBACK");
                     logger.error("Erreur restauration stock", {
                       error: uErr.message,
                       saleId,
@@ -369,19 +369,19 @@ const SaleService = {
                   ops++;
                   if (ops === items.length && !hasError) {
                     // Marquer la vente comme annulée (audit preserved)
-                    db.run(
+                    getDb().run(
                       "UPDATE sales SET status = ? WHERE id = ?",
                       ["cancelled", saleId],
                       (err2) => {
                         if (err2) {
-                          db.run("ROLLBACK");
+                          getDb().run("ROLLBACK");
                           logger.error("Erreur mise à jour status vente", {
                             error: err2.message,
                             saleId,
                           });
                           return callback(err2);
                         }
-                        db.run("COMMIT", (commitErr) => {
+                        getDb().run("COMMIT", (commitErr) => {
                           if (commitErr) {
                             logger.error(
                               "Erreur lors du COMMIT de l'annulation de vente",
@@ -409,27 +409,27 @@ const SaleService = {
     });
   },
   getSales: (callback) => {
-    db.all("SELECT * FROM sales ORDER BY date DESC", [], callback);
+    getDb().all("SELECT * FROM sales ORDER BY date DESC", [], callback);
   },
   getSaleDetails: (saleId, callback) => {
-    db.all("SELECT * FROM sale_items WHERE sale_id = ?", [saleId], callback);
+    getDb().all("SELECT * FROM sale_items WHERE sale_id = ?", [saleId], callback);
   },
   getDailySalesTotal: (callback) => {
-    db.get(
+    getDb().get(
       "SELECT SUM(total) as dailyTotal FROM sales WHERE date(date) = date('now') AND status IS NOT 'cancelled'",
       [],
       callback,
     );
   },
   getWeeklySalesTotal: (callback) => {
-    db.get(
+    getDb().get(
       "SELECT SUM(total) as weeklyTotal FROM sales WHERE date(date) >= date('now', 'weekday 0', '-7 days') AND status IS NOT 'cancelled'",
       [],
       callback,
     );
   },
   getMonthlySalesTotal: (callback) => {
-    db.get(
+    getDb().get(
       "SELECT SUM(total) as monthlyTotal FROM sales WHERE strftime('%Y-%m', date) = strftime('%Y-%m', 'now') AND status IS NOT 'cancelled'",
       [],
       callback,
@@ -437,14 +437,14 @@ const SaleService = {
   },
 
   getCumulativeSalesTotal: (callback) => {
-    db.get(
+    getDb().get(
       "SELECT SUM(total) as cumulativeTotal FROM sales WHERE status IS NOT 'cancelled'",
       [],
       callback,
     );
   },
   getSalesByDateRange: (startDate, endDate, callback) => {
-    db.all(
+    getDb().all(
       "SELECT * FROM sales WHERE date(date) BETWEEN ? AND ? ORDER BY date DESC",
       [startDate, endDate],
       callback,
@@ -472,7 +472,7 @@ const SaleService = {
 			WHERE date(s.date) BETWEEN ? AND ? AND s.status IS NOT 'cancelled'
 			ORDER BY s.date DESC, s.id DESC
 		`;
-    db.all(sql, [startDate, endDate], callback);
+    getDb().all(sql, [startDate, endDate], callback);
   },
 
   getBestSellingProducts: (limit = 5, callback) => {
@@ -489,7 +489,7 @@ const SaleService = {
 			ORDER BY total_sold DESC
 			LIMIT ?
 		`;
-    db.all(sql, [limit], callback);
+    getDb().all(sql, [limit], callback);
   },
 
   getCumulativeMonthlySales: (yearMonth, callback) => {
@@ -509,7 +509,7 @@ const SaleService = {
 			FROM DailySales
 			ORDER BY sale_day
 		`;
-    db.all(sql, [yearMonth], callback);
+    getDb().all(sql, [yearMonth], callback);
   },
 
   getSellerPerformance: (startDate, endDate, callback) => {
@@ -530,7 +530,7 @@ const SaleService = {
       GROUP BY u.id
       ORDER BY total_revenue DESC
     `;
-    db.all(sql, [startDate, endDate], callback);
+    getDb().all(sql, [startDate, endDate], callback);
   },
 
   // Commission report: returns commission_percent from users and computed commission_amount
@@ -549,7 +549,7 @@ const SaleService = {
       GROUP BY u.id
       ORDER BY total_revenue DESC
     `;
-    db.all(sql, [startDate, endDate], (err, rows) => {
+    getDb().all(sql, [startDate, endDate], (err, rows) => {
       if (err) return callback(err);
       // compute commission_amount
       const helper = require("./commissionHelper.cjs");
@@ -579,7 +579,7 @@ const SaleService = {
       : "date";
 
     // Requête de données
-    db.all(
+    getDb().all(
       `SELECT * FROM sales WHERE status IS NOT 'cancelled'
        ORDER BY ${sortField} DESC
        LIMIT ? OFFSET ?`,
@@ -588,7 +588,7 @@ const SaleService = {
         if (err) return callback(err);
 
         // Requête du total pour pagination
-        db.get(
+        getDb().get(
           "SELECT COUNT(*) as total FROM sales WHERE status IS NOT 'cancelled'",
           [],
           (countErr, countRow) => {
@@ -614,7 +614,7 @@ const SaleService = {
     const offset = page * limit;
     const searchTerm = `%${search}%`;
 
-    db.all(
+    getDb().all(
       `SELECT * FROM products
        WHERE (model LIKE ? OR brand LIKE ? OR category LIKE ?)
        AND stock > 0
@@ -624,7 +624,7 @@ const SaleService = {
       (err, rows) => {
         if (err) return callback(err);
 
-        db.get(
+        getDb().get(
           `SELECT COUNT(*) as total FROM products
            WHERE (model LIKE ? OR brand LIKE ? OR category LIKE ?)
            AND stock > 0`,
@@ -649,10 +649,10 @@ const SaleService = {
    * Statistiques rapides (pour dashboard - optimisé avec indices)
    */
   getQuickStats: (callback) => {
-    db.serialize(() => {
+    getDb().serialize(() => {
       const today = new Date().toISOString().split("T")[0];
 
-      db.all(
+      getDb().all(
         `SELECT
           (SELECT SUM(total) FROM sales WHERE date(date) = ? AND status IS NOT 'cancelled') as today_sales,
           (SELECT COUNT(*) FROM sales WHERE date(date) = ? AND status IS NOT 'cancelled') as today_count,

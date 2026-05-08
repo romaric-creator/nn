@@ -85,17 +85,4 @@ app.whenReady().then(async () => {
 app.on("window-all-closed", function () {
   if (process.platform !== "darwin") app.quit();
 });
-
-app.on("window-all-closed", function () {
-  if (process.platform !== "darwin") app.quit();
-});
-
-// Enregistrement des IPC handlers
-require("./ipc/customer.cjs");
-require("./ipc/sale.cjs");
-require("./ipc/stock.cjs");
-require("./ipc/user.cjs");
-require("./ipc/backup.cjs");
-require("./ipc/db.cjs");
-require("./ipc/audit.cjs");
 require("./ipc/invoice.cjs");

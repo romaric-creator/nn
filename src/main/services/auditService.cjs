@@ -1,4 +1,4 @@
-const { db } = require("../db/database.cjs");
+const { getDb } = require("../db/database.cjs");
 
 const AuditService = {
   /**
@@ -19,7 +19,7 @@ const AuditService = {
         al.new_value,
         NULL           AS reason,
         'audit'        AS log_type,
-        CASE 
+        CASE
           WHEN al.entity = 'products' THEN (SELECT model FROM products WHERE id = al.entity_id)
           WHEN al.entity = 'sales' THEN (SELECT 'Vente #' || id FROM sales WHERE id = al.entity_id)
           WHEN al.entity = 'customers' THEN (SELECT name FROM customers WHERE id = al.entity_id)
@@ -68,7 +68,7 @@ const AuditService = {
       ORDER BY timestamp DESC
       LIMIT ?
     `;
-    db.all(sql, [limit], callback);
+    getDb().all(sql, [limit], callback);
   },
 
   /**
@@ -76,22 +76,22 @@ const AuditService = {
    */
   logAudit: (entity, entityId, action, userId, oldValue, newValue) => {
     const timestamp = new Date().toISOString();
-    
+
     // 1. Insérer le nouveau log
     const sql = `
       INSERT INTO audit_logs (entity, entity_id, action, user_id, old_value, new_value, timestamp)
       VALUES (?, ?, ?, ?, ?, ?, ?)
     `;
-    db.run(sql, [entity, entityId, action.toUpperCase(), userId, oldValue, newValue, timestamp], (err) => {
+    getDb().run(sql, [entity, entityId, action.toUpperCase(), userId, oldValue, newValue, timestamp], (err) => {
       if (err) console.error("Erreur audit_logs:", err.message);
-      
+
       // 2. Rotation automatique (Purger les logs de plus de 365 jours pour performance)
       const purgeDate = new Date();
       purgeDate.setDate(purgeDate.getDate() - 365);
       const purgeStr = purgeDate.toISOString();
 
-      db.run("DELETE FROM audit_logs WHERE timestamp < ?", [purgeStr]);
-      db.run("DELETE FROM user_logs WHERE timestamp < ?", [purgeStr]);
+      getDb().run("DELETE FROM audit_logs WHERE timestamp < ?", [purgeStr]);
+      getDb().run("DELETE FROM user_logs WHERE timestamp < ?", [purgeStr]);
     });
   },
 
@@ -103,7 +103,7 @@ const AuditService = {
       ORDER BY ul.timestamp DESC
       LIMIT ?
     `;
-    db.all(sql, [limit], callback);
+    getDb().all(sql, [limit], callback);
   }
 };
 

@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs');
-const { db } = require('../db/database.cjs');
+const { getDb } = require('../db/database.cjs');
 const logger = require('./loggingService.cjs');
 
 async function hashPassword(password) {
@@ -17,7 +17,7 @@ const UserService = {
 			const hashedPassword = await hashPassword(user.password);
 			const sql = `INSERT INTO users (name, login, hash, role, active) VALUES (?, ?, ?, ?, 1)`;
 			const params = [user.name, user.login, hashedPassword, user.role];
-			db.run(sql, params, function (err) {
+			getDb().run(sql, params, function (err) {
 				if (err) {
 					logger.error("Erreur lors de la création de l'utilisateur", { error: err.message, login: user.login });
 					return callback(err);
@@ -39,7 +39,7 @@ const UserService = {
 		}
 
 		const sql = `SELECT * FROM users WHERE LOWER(login) = ?`;
-		db.get(sql, [cleanLogin], async (err, row) => {
+		getDb().get(sql, [cleanLogin], async (err, row) => {
 			if (err) {
 				logger.error("Erreur technique lors de l'authentification", { error: err.message, login: cleanLogin });
 				return callback(err);
@@ -75,10 +75,10 @@ const UserService = {
 		});
 	},
 	getAllUsers: (callback) => {
-		db.all('SELECT id, name, login, role, active FROM users', [], callback);
+		getDb().all('SELECT id, name, login, role, active FROM users', [], callback);
 	},
 	deactivateUser: (id, callback) => {
-		db.run('UPDATE users SET active = 0 WHERE id = ?', [id], function (err) {
+		getDb().run('UPDATE users SET active = 0 WHERE id = ?', [id], function (err) {
 			if (err) {
 				logger.error("Erreur lors de la désactivation de l'utilisateur", { error: err.message, userId: id });
 				return callback(err);
@@ -90,7 +90,7 @@ const UserService = {
 	updatePassword: async (userId, newPassword, callback) => {
 		try {
 			const hashedPassword = await hashPassword(newPassword);
-			db.run('UPDATE users SET hash = ? WHERE id = ?', [hashedPassword, userId], function (err) {
+			getDb().run('UPDATE users SET hash = ? WHERE id = ?', [hashedPassword, userId], function (err) {
 				if (err) {
 					logger.error("Erreur mise à jour mot de passe", { error: err.message, userId });
 					return callback(err);
@@ -104,7 +104,7 @@ const UserService = {
 		}
 	},
 	logAction: (user_id, action, callback) => {
-		db.run('INSERT INTO user_logs (user_id, timestamp, action) VALUES (?, datetime("now"), ?)', [user_id, action], callback);
+		getDb().run('INSERT INTO user_logs (user_id, timestamp, action) VALUES (?, datetime("now"), ?)', [user_id, action], callback);
 	}
 };
 
