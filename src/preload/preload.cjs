@@ -43,9 +43,10 @@ contextBridge.exposeInMainWorld("electronAPI", {
       "customer:getAll",
       "customer:getById",
       "customer:getSales",
-      // BUG FIX: canaux manquants — customer:update et customer:delete
-      // n'étaient pas dans la whitelist → ipcRenderer.invoke retournait undefined
-      // même si les handlers IPC existaient côté main
+      // BUG FIX #2 & #3: Canaux manquants — customer:update et customer:delete
+      // ÉTAIENT absents de la whitelist → ipcRenderer.invoke retournait undefined
+      // même si les handlers IPC existaient côté main (customer.cjs lignes 42-60)
+      // RÉSULTAT: Édition et suppression d'un client ne fonctionnaient pas
       "customer:update",
       "customer:delete",
       // Utilisateurs

@@ -1,12 +1,13 @@
 // src/main/main.cjs
 // Point d'entrée principal Electron (Cameroun, architecture pro)
+// FIX: Strictement ordonné pour éviter les verrous de fichier Windows
 
 const { app, BrowserWindow, Menu } = require("electron");
 const path = require("path");
 const fs = require('fs');
 const logger = require('./services/loggingService.cjs');
 
-// Import du module database SANS instancier la connexion tout de suite
+// PHASE 1 : Import du module database SANS instancier la connexion
 const databaseModule = require("./db/database.cjs");
 
 function createWindow() {
@@ -36,12 +37,13 @@ app.whenReady().then(async () => {
 
     logger.info("Démarrage de l'application...");
 
-    // --- ÉTAPE 1 : LOGIQUE DE MAINTENANCE (AVANT OUVERTURE DB) ---
+    // --- PHASE 2 : LOGIQUE DE MAINTENANCE (AVANT OUVERTURE DB) ---
+    // À ce stade, aucun require vers IPC n'a été exécuté, donc la DB est libre
     if (!fs.existsSync(initMarker)) {
       if (fs.existsSync(dbPath)) {
         const backupPath = dbPath + ".old_" + Date.now();
         try {
-          // Ici le rename fonctionne car db n'est pas encore instancié
+          // Le rename fonctionne car db n'est pas encore instancié
           fs.renameSync(dbPath, backupPath);
           logger.info("Premier démarrage : Ancienne base sauvegardée sous %s", backupPath);
         } catch (renameError) {
@@ -56,17 +58,31 @@ app.whenReady().then(async () => {
       logger.info("Marqueur d'initialisation créé.");
     }
 
-    // --- ÉTAPE 2 : INITIALISATION DE LA BASE DE DONNÉES ---
+    // --- PHASE 3 : INITIALISATION DE LA BASE DE DONNÉES ---
     // Instancier la connexion DB après la maintenance des fichiers
     const db = databaseModule.initDbConnection();
     await databaseModule.initDb(db, databaseModule.schemaPath);
     logger.info("Base de données initialisée avec succès.");
 
-    // --- ÉTAPE 3 : SERVICES SECONDAIRES ---
+    // --- PHASE 4 : SERVICES SECONDAIRES ---
+    // Charger les services APRÈS initialisation de la DB
     const BackupService = require("./services/backupService.cjs");
     BackupService.autoBackup();
     logger.info("Service de sauvegarde automatique activé.");
 
+    // --- PHASE 5 : ENREGISTREMENT DES IPC HANDLERS ---
+    // Charger les IPC APRÈS la DB et les services
+    require("./ipc/customer.cjs");
+    require("./ipc/sale.cjs");
+    require("./ipc/stock.cjs");
+    require("./ipc/user.cjs");
+    require("./ipc/backup.cjs");
+    require("./ipc/db.cjs");
+    require("./ipc/audit.cjs");
+    require("./ipc/invoice.cjs");
+    logger.info("Tous les IPC handlers enregistrés.");
+
+    // --- PHASE 6 : UI & MENUS ---
     createWindow();
     logger.info("Fenêtre principale créée.");
 
@@ -92,17 +108,6 @@ app.whenReady().then(async () => {
 app.on("window-all-closed", function () {
   if (process.platform !== "darwin") app.quit();
 });
-
-// Enregistrement des IPC handlers
-// (Vérifie qu'ils n'ouvrent pas la DB à l'import, sinon déplacer après initDbConnection())
-require("./ipc/customer.cjs");
-require("./ipc/sale.cjs");
-require("./ipc/stock.cjs");
-require("./ipc/user.cjs");
-require("./ipc/backup.cjs");
-require("./ipc/db.cjs");
-require("./ipc/audit.cjs");
-require("./ipc/invoice.cjs");
 
 // Capture des erreurs non gérées
 process.on('uncaughtException', (err) => {
