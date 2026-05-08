@@ -28,7 +28,7 @@ function createWindow() {
 app.whenReady().then(async () => {
   const fs = require('fs');
   const { dbPath } = require("./db/database.cjs");
-  const initMarker = path.join(app.getPath("appData"), "it-manager-desktop", ".initialized");
+  const initMarker = path.join(app.getPath("userData"), "it-manager-desktop", ".initialized");
 
   // Logique de "Premier Démarrage" : si le marqueur n'existe pas, on repart à zéro
   // mais on garde une trace de l'ancienne base au cas où (backup).
@@ -45,7 +45,7 @@ app.whenReady().then(async () => {
   }
 
   await initDb(db, schemaPath);
-  
+
   // Automated Daily Backup
   const BackupService = require("./services/backupService.cjs");
   BackupService.autoBackup();
