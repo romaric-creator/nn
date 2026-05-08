@@ -1,9 +1,11 @@
 // src/main/main.cjs
 // Point d'entrée principal Electron (Cameroun, architecture pro)
+// FIX: Strictement ordonné pour éviter les verrous de fichier Windows
 
-const { app, BrowserWindow, ipcMain, Menu } = require("electron");
+const { app, BrowserWindow, Menu } = require("electron");
 const path = require("path");
-const { initDb, initDbConnection, schemaPath } = require("./db/database.cjs");
+const fs = require('fs');
+const { initDb, initDbConnection, getDb, dbPath, schemaPath } = require("./db/database.cjs");
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -26,8 +28,6 @@ function createWindow() {
 }
 
 app.whenReady().then(async () => {
-  const fs = require('fs');
-  const { dbPath, getDb } = require("./db/database.cjs");
   const initMarker = path.join(app.getPath("userData"), "it-manager-desktop", ".initialized");
 
   // Logique de "Premier Démarrage" : si le marqueur n'existe pas, on repart à zéro
@@ -68,7 +68,7 @@ app.whenReady().then(async () => {
   require("./ipc/invoice.cjs");
 
   createWindow();
-  // Menu natif minimal (exemple)
+  // Menu natif minimal
   const menu = Menu.buildFromTemplate([
     { label: "Fichier", submenu: [{ role: "quit", label: "Quitter" }] },
     { label: "Vente", submenu: [] },
@@ -85,3 +85,17 @@ app.whenReady().then(async () => {
 app.on("window-all-closed", function () {
   if (process.platform !== "darwin") app.quit();
 });
+
+app.on("window-all-closed", function () {
+  if (process.platform !== "darwin") app.quit();
+});
+
+// Enregistrement des IPC handlers
+require("./ipc/customer.cjs");
+require("./ipc/sale.cjs");
+require("./ipc/stock.cjs");
+require("./ipc/user.cjs");
+require("./ipc/backup.cjs");
+require("./ipc/db.cjs");
+require("./ipc/audit.cjs");
+require("./ipc/invoice.cjs");
