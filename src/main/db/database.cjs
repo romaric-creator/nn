@@ -400,7 +400,7 @@ const initDb = (databaseInstance, schemaFilePath) => {
           const bcrypt = require("bcryptjs");
           const defaultPass = "admin";
           const saltRounds = 10;
-          
+
           if (!row) {
             const hash = await bcrypt.hash(defaultPass, saltRounds);
             databaseInstance.run(
@@ -421,7 +421,7 @@ const initDb = (databaseInstance, schemaFilePath) => {
               const seedPath = isPackaged
                 ? path.join(process.resourcesPath, "seed.sql")
                 : path.join(__dirname, "../../../seed.sql");
-                
+
               if (fs.existsSync(seedPath)) {
                 const seedContent = fs.readFileSync(seedPath, "utf-8");
                 databaseInstance.exec(seedContent, (errSeed) => {
@@ -430,7 +430,7 @@ const initDb = (databaseInstance, schemaFilePath) => {
                   } else {
                     console.log("Données de base (seed) importées avec succès.");
                   }
-                  
+
                   // Integrity check after first init
                   databaseInstance.get("PRAGMA integrity_check;", (ichkErr, ichkRow) => {
                     console.log("Integrity Check Result:", ichkRow);
@@ -445,9 +445,9 @@ const initDb = (databaseInstance, schemaFilePath) => {
               // Integrity check on normal boot
               databaseInstance.get("PRAGMA integrity_check;", (ichkErr, ichkRow) => {
                 if (ichkErr || !ichkRow || ichkRow.integrity_check !== "ok") {
-                    console.error("DATABASE INTEGRITY ERROR:", ichkErr || ichkRow);
+                  console.error("DATABASE INTEGRITY ERROR:", ichkErr || ichkRow);
                 } else {
-                    console.log("Database integrity verified: OK");
+                  console.log("Database integrity verified: OK");
                 }
                 resolve(databaseInstance);
               });
@@ -464,6 +464,31 @@ const productionDbPath = app
   : path.join(__dirname, "../../temp_test_db", "inventory.db"); // Fallback for non-Electron env
 
 const dbPath = productionDbPath;
-const db = createDbConnection(productionDbPath);
 
-module.exports = { createDbConnection, initDb, db, dbPath, productionDbPath, schemaPath };
+// db instance is created lazily when needed (after app.whenReady)
+let dbInstance = null;
+
+function getDb() {
+  if (!dbInstance) {
+    throw new Error("Database not initialized. Call initDbConnection() first.");
+  }
+  return dbInstance;
+}
+
+function initDbConnection() {
+  if (!dbInstance) {
+    dbInstance = createDbConnection(productionDbPath);
+  }
+  return dbInstance;
+}
+
+module.exports = {
+  createDbConnection,
+  initDb,
+  getDb,
+  initDbConnection,
+  get db() { return getDb(); },  // fallback getter for compatibility
+  dbPath,
+  productionDbPath,
+  schemaPath
+};

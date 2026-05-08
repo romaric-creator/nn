@@ -3,7 +3,7 @@
 
 const { app, BrowserWindow, ipcMain, Menu } = require("electron");
 const path = require("path");
-const { initDb, db, schemaPath } = require("./db/database.cjs");
+const { initDb, initDbConnection, schemaPath } = require("./db/database.cjs");
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -27,7 +27,7 @@ function createWindow() {
 
 app.whenReady().then(async () => {
   const fs = require('fs');
-  const { dbPath } = require("./db/database.cjs");
+  const { dbPath, getDb } = require("./db/database.cjs");
   const initMarker = path.join(app.getPath("userData"), "it-manager-desktop", ".initialized");
 
   // Logique de "Premier Démarrage" : si le marqueur n'existe pas, on repart à zéro
@@ -44,11 +44,28 @@ app.whenReady().then(async () => {
     fs.writeFileSync(initMarker, new Date().toISOString());
   }
 
+  // Initialize database connection FIRST
+  initDbConnection();
+
+  // Get the db instance for initDb
+  const db = getDb();
+
+  // Initialize database schema and migrations
   await initDb(db, schemaPath);
 
   // Automated Daily Backup
   const BackupService = require("./services/backupService.cjs");
   BackupService.autoBackup();
+
+  // NOW load all IPC handlers (they can safely use db after initialization)
+  require("./ipc/customer.cjs");
+  require("./ipc/sale.cjs");
+  require("./ipc/stock.cjs");
+  require("./ipc/user.cjs");
+  require("./ipc/backup.cjs");
+  require("./ipc/db.cjs");
+  require("./ipc/audit.cjs");
+  require("./ipc/invoice.cjs");
 
   createWindow();
   // Menu natif minimal (exemple)
@@ -68,13 +85,3 @@ app.whenReady().then(async () => {
 app.on("window-all-closed", function () {
   if (process.platform !== "darwin") app.quit();
 });
-
-// Enregistrement des IPC handlers
-require("./ipc/customer.cjs");
-require("./ipc/sale.cjs");
-require("./ipc/stock.cjs");
-require("./ipc/user.cjs");
-require("./ipc/backup.cjs");
-require("./ipc/db.cjs");
-require("./ipc/audit.cjs");
-require("./ipc/invoice.cjs");
