@@ -1,9 +1,13 @@
 // src/main/main.cjs
 // Point d'entrée principal Electron (Cameroun, architecture pro)
 
-const { app, BrowserWindow, ipcMain, Menu } = require("electron");
+const { app, BrowserWindow, Menu } = require("electron");
 const path = require("path");
-const { initDb, db, schemaPath } = require("./db/database.cjs");
+const fs = require('fs');
+const logger = require('./services/loggingService.cjs');
+
+// Import du module database SANS instancier la connexion tout de suite
+const databaseModule = require("./db/database.cjs");
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -26,43 +30,63 @@ function createWindow() {
 }
 
 app.whenReady().then(async () => {
-  const fs = require('fs');
-  const { dbPath } = require("./db/database.cjs");
-  const initMarker = path.join(app.getPath("userData"), "it-manager-desktop", ".initialized");
+  try {
+    const dbPath = databaseModule.dbPath;
+    const initMarker = path.join(app.getPath("userData"), ".initialized");
 
-  // Logique de "Premier Démarrage" : si le marqueur n'existe pas, on repart à zéro
-  // mais on garde une trace de l'ancienne base au cas où (backup).
-  if (!fs.existsSync(initMarker)) {
-    if (fs.existsSync(dbPath)) {
-      const backupPath = dbPath + ".old_" + Date.now();
-      fs.renameSync(dbPath, backupPath);
-      console.log("Premier démarrage détecté. Ancienne base renommée en :", backupPath);
+    logger.info("Démarrage de l'application...");
+
+    // --- ÉTAPE 1 : LOGIQUE DE MAINTENANCE (AVANT OUVERTURE DB) ---
+    if (!fs.existsSync(initMarker)) {
+      if (fs.existsSync(dbPath)) {
+        const backupPath = dbPath + ".old_" + Date.now();
+        try {
+          // Ici le rename fonctionne car db n'est pas encore instancié
+          fs.renameSync(dbPath, backupPath);
+          logger.info("Premier démarrage : Ancienne base sauvegardée sous %s", backupPath);
+        } catch (renameError) {
+          logger.error("Erreur lors du renommage de la base :", renameError);
+        }
+      }
+      
+      // Créer le marqueur d'initialisation
+      const dir = path.dirname(initMarker);
+      if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+      fs.writeFileSync(initMarker, new Date().toISOString());
+      logger.info("Marqueur d'initialisation créé.");
     }
-    // Créer le marqueur pour les prochains démarrages
-    const dir = path.dirname(initMarker);
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    fs.writeFileSync(initMarker, new Date().toISOString());
+
+    // --- ÉTAPE 2 : INITIALISATION DE LA BASE DE DONNÉES ---
+    // Instancier la connexion DB après la maintenance des fichiers
+    const db = databaseModule.initDbConnection();
+    await databaseModule.initDb(db, databaseModule.schemaPath);
+    logger.info("Base de données initialisée avec succès.");
+
+    // --- ÉTAPE 3 : SERVICES SECONDAIRES ---
+    const BackupService = require("./services/backupService.cjs");
+    BackupService.autoBackup();
+    logger.info("Service de sauvegarde automatique activé.");
+
+    createWindow();
+    logger.info("Fenêtre principale créée.");
+
+    // Menu natif minimal
+    const menu = Menu.buildFromTemplate([
+      { label: "Fichier", submenu: [{ role: "quit", label: "Quitter" }] },
+      { label: "Vente", submenu: [] },
+      { label: "Stock", submenu: [] },
+      { label: "Rapports", submenu: [] },
+    ]);
+    Menu.setApplicationMenu(menu);
+
+    app.on("activate", function () {
+      if (BrowserWindow.getAllWindows().length === 0) createWindow();
+    });
+
+  } catch (fatalError) {
+    logger.error("Erreur fatale au démarrage :", fatalError);
+    process.exit(1);
   }
-
-  await initDb(db, schemaPath);
-
-  // Automated Daily Backup
-  const BackupService = require("./services/backupService.cjs");
-  BackupService.autoBackup();
-
-  createWindow();
-  // Menu natif minimal (exemple)
-  const menu = Menu.buildFromTemplate([
-    { label: "Fichier", submenu: [{ role: "quit", label: "Quitter" }] },
-    { label: "Vente", submenu: [] },
-    { label: "Stock", submenu: [] },
-    { label: "Rapports", submenu: [] },
-  ]);
-  Menu.setApplicationMenu(menu);
-
-  app.on("activate", function () {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow();
-  });
 });
 
 app.on("window-all-closed", function () {
@@ -70,6 +94,7 @@ app.on("window-all-closed", function () {
 });
 
 // Enregistrement des IPC handlers
+// (Vérifie qu'ils n'ouvrent pas la DB à l'import, sinon déplacer après initDbConnection())
 require("./ipc/customer.cjs");
 require("./ipc/sale.cjs");
 require("./ipc/stock.cjs");
@@ -78,3 +103,13 @@ require("./ipc/backup.cjs");
 require("./ipc/db.cjs");
 require("./ipc/audit.cjs");
 require("./ipc/invoice.cjs");
+
+// Capture des erreurs non gérées
+process.on('uncaughtException', (err) => {
+  logger.error('Uncaught Exception:', err);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  logger.error('Unhandled Rejection at:', promise, 'reason:', reason);
+});
