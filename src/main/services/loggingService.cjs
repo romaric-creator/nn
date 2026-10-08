@@ -2,10 +2,18 @@ const winston = require('winston');
 require('winston-daily-rotate-file');
 const path = require('path');
 const fs = require('fs');
-const { app } = require('electron');
 
-// Crée le dossier logs s'il n'existe pas
-const logDir = path.join(app.getPath('userData'), 'logs');
+let app;
+try {
+  app = require('electron').app;
+} catch (err) {
+  app = null;
+}
+
+const logDir = app
+  ? path.join(app.getPath('userData'), 'logs')
+  : path.join(__dirname, '../../logs');
+
 try {
   if (!fs.existsSync(logDir)) {
     fs.mkdirSync(logDir, { recursive: true });
@@ -42,7 +50,6 @@ const logger = winston.createLogger({
   ]
 });
 
-// Si nous ne sommes pas en production, logguer aussi dans la console
 if (process.env.NODE_ENV !== 'production') {
   logger.add(new winston.transports.Console({
     format: winston.format.combine(

@@ -2,7 +2,20 @@
   "appId": "com.flexystore.shop",
   "productName": "Flexy Store",
   "asar": true,
-  "files": ["dist/**/*", "src/main/**/*", "src/preload/**/*"],
+  "asarUnpack": [
+    "node_modules/sqlite3/**/*",
+    "node_modules/bcryptjs/**/*"
+  ],
+  "files": [
+    "dist/**/*",
+    "src/main/**/*",
+    "src/preload/**/*",
+    "node_modules/sqlite3/**/*",
+    "node_modules/bcryptjs/**/*",
+    "node_modules/winston/**/*",
+    "node_modules/winston-daily-rotate-file/**/*",
+    "node_modules/exceljs/**/*"
+  ],
   "directories": {
     "buildResources": "build",
     "output": "release"
@@ -23,7 +36,8 @@
         "target": "nsis",
         "arch": ["x64"]
       }
-    ]
+    ],
+    "requestedExecutionLevel": "asInvoker"
   },
   "linux": {
     "target": "AppImage",
@@ -34,6 +48,7 @@
     "allowToChangeInstallationDirectory": true,
     "createDesktopShortcut": true,
     "createStartMenuShortcut": true,
-    "shortcutName": "Flexy Store"
+    "shortcutName": "Flexy Store",
+    "perMachine": false
   }
 }

@@ -64,6 +64,7 @@ export default function Sales() {
   const [showCart, setShowCart] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>("Toutes");
   const [allCategories, setAllCategories] = useState<string[]>([]);
+  const [editingPriceId, setEditingPriceId] = useState<number | null>(null);
   
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -380,7 +381,7 @@ export default function Sales() {
         `}>
           {/* Mobile Close Backdrop */}
           <div 
-            className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm xl:hidden -z-10"
+            className="absolute inset-0 bg-slate-900/50 xl:hidden -z-10"
             onClick={() => setShowCart(false)}
           />
           
@@ -585,7 +586,7 @@ export default function Sales() {
 
       {/* Modal: Ajouter Client */}
       {showAddCustomerModal && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[999] p-4 animate-in fade-in duration-300">
+        <div className="fixed inset-0 bg-slate-900/60 flex items-center justify-center z-[999] p-4 animate-in fade-in duration-300">
           <div className="bg-white rounded-[2.5rem] shadow-2xl max-w-md w-full overflow-hidden border border-white/20 animate-in zoom-in-95 duration-300">
             <div className="p-8 bg-indigo-600 text-white relative overflow-hidden">
                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 blur-3xl rounded-full -mr-16 -mt-16"></div>

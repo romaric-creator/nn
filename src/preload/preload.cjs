@@ -20,6 +20,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
       "stock:addMovement",
       "stock:history",
       "stock:bulkReceive",
+      "stock:restore",
       // Ventes
       "sale:checkout",
       "sale:create",
@@ -55,6 +56,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
       "user:deactivate",
       "user:login",
       "user:logAction",
+      "user:updatePassword",
       // Audit
       "audit:getLogs",
       "audit:getUserLogs",
@@ -64,11 +66,19 @@ contextBridge.exposeInMainWorld("electronAPI", {
       "invoice:getById",
       "invoice:getAll",
       "invoice:getByCustomerId",
+      // Backup
+      "backup:create",
+      "backup:list",
+      "backup:restore",
+      "backup:cleanup",
       // Base de données
       "db:backup",
       "db:restore",
       "db:status",
       "db:export-sql",
+      // Réparations
+      "repair:mark-quantity-as-repaired",
+      "repair:mark-unit-as-repaired",
       // Unités
       "units:list",
       "units:find",

@@ -122,7 +122,7 @@ export default function App() {
             onChangePassword={() => setShowPasswordModal(true)}
           />
 
-          <main className="flex-1 overflow-y-auto custom-scrollbar relative z-10 p-4 md:p-6 lg:p-8">
+          <main className="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar relative z-10 p-4 md:p-6 lg:p-8" style={{ willChange: 'scroll-position' }}>
             <div className="max-w-[1600px] mx-auto">
               {/* Page Transition Wrapper can be added here if framer-motion was available */}
               <div className="min-h-full">
@@ -184,7 +184,7 @@ export default function App() {
 
         {/* Global Password Update Modal */}
         {showPasswordModal && (
-          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[999] flex items-center justify-center p-4 animate-in fade-in duration-300">
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[999] flex items-center justify-center p-4 animate-in fade-in duration-300">
             <div className="bg-white rounded-[2rem] w-full max-w-md shadow-2xl overflow-hidden animate-in zoom-in-95 duration-500">
                <div className="p-8 bg-slate-900 text-white relative">
                   <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-3xl"></div>

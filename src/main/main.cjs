@@ -11,11 +11,17 @@ function createWindow() {
   const win = new BrowserWindow({
     width: 1200,
     height: 800,
+    show: false,
     webPreferences: {
       preload: path.join(__dirname, "../preload/preload.cjs"),
       contextIsolation: true,
       nodeIntegration: false,
+      backgroundThrottling: false,
     },
+  });
+
+  win.once('ready-to-show', () => {
+    win.show();
   });
 
   if (process.env.NODE_ENV === "development") {
@@ -66,6 +72,7 @@ app.whenReady().then(async () => {
   require("./ipc/db.cjs");
   require("./ipc/audit.cjs");
   require("./ipc/invoice.cjs");
+  require("./ipc/repair.cjs");
 
   createWindow();
   // Menu natif minimal
@@ -85,4 +92,3 @@ app.whenReady().then(async () => {
 app.on("window-all-closed", function () {
   if (process.platform !== "darwin") app.quit();
 });
-require("./ipc/invoice.cjs");

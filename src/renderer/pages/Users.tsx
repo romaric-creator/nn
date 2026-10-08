@@ -95,8 +95,11 @@ export default function UsersPage() {
       if (res.success) {
         notify('success', 'Mot de passe mis à jour', `Le mot de passe de ${passModal.userName} a été réinitialisé.`);
         setPassModal({ open: false, userId: 0, userName: '', password: '' });
+      } else {
+        notify('error', 'Erreur', res.message || 'Impossible de mettre à jour le mot de passe.');
       }
-    } catch (error) {
+    } catch (error: any) {
+      notify('error', 'Erreur', error.message || 'Une erreur inattendue s\'est produite.');
       console.error(error);
     }
   };

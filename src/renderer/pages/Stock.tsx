@@ -606,7 +606,7 @@ export default function Stock() {
 
       {/* Supply Modal */}
       {isSupplyModalOpen && selectedProduct && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[999] flex items-center justify-center p-6 animate-in fade-in duration-300">
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[999] flex items-center justify-center p-6 animate-in fade-in duration-300">
           <div className="bg-white rounded-[2.5rem] w-full max-w-lg shadow-2xl overflow-hidden animate-in zoom-in-95 duration-500">
             <div className="p-10 bg-indigo-600 text-white flex justify-between items-center relative overflow-hidden">
               <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16"></div>
@@ -665,7 +665,7 @@ export default function Stock() {
 
       {/* NEW/EDIT Modal logic matches original - Simplified UI follows same logic */}
       {(isModalOpen || isEditModalOpen) && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[999] flex items-center justify-center p-4 animate-in fade-in duration-300">
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[999] flex items-center justify-center p-4 animate-in fade-in duration-300">
           <div className="bg-white rounded-[2.5rem] w-[95vw] md:w-[85vw] lg:w-[75vw] xl:max-w-5xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-500 max-h-[96vh] flex flex-col">
             <div className="p-6 md:p-8 bg-slate-900 text-white flex justify-between items-center relative shrink-0">
               <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-[100px]"></div>
@@ -978,7 +978,7 @@ export default function Stock() {
 
       {/* HS Modal */}
       {isDefectiveModalOpen && selectedProduct && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[999] flex items-center justify-center p-6 animate-in fade-in duration-300">
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[999] flex items-center justify-center p-6 animate-in fade-in duration-300">
           <div className="bg-white rounded-[2.5rem] w-full max-w-lg shadow-2xl overflow-hidden animate-in zoom-in-95 duration-500">
             <div className="p-10 bg-rose-600 text-white flex justify-between items-center relative overflow-hidden">
               <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16"></div>

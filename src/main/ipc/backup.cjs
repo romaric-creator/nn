@@ -43,24 +43,21 @@ ipcMain.handle('db:restore', async (event) => {
     });
 
     if (response === 1) {
-      try {
-        // 1. Close the database connection
+      return new Promise((resolve) => {
         db.close((err) => {
           if (err) {
             console.error('Erreur fermeture DB pour restauration:', err.message);
           }
-          
-          // 2. Replace the file
-          fs.copyFileSync(backupPath, dbPath);
-          
-          // 3. Relaunch the app
-          app.relaunch();
-          app.exit(0);
+          try {
+            fs.copyFileSync(backupPath, dbPath);
+            resolve({ success: true, message: 'Restauration en cours...' });
+            app.relaunch();
+            app.exit(0);
+          } catch (copyErr) {
+            resolve({ success: false, message: 'Erreur lors de la restauration : ' + copyErr.message });
+          }
         });
-        return { success: true, message: 'Restauration en cours...' };
-      } catch (err) {
-        return { success: false, message: 'Erreur lors de la restauration : ' + err.message };
-      }
+      });
     }
   }
   return { success: false, message: 'Restauration annulée' };

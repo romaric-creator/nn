@@ -47,13 +47,13 @@
     @apply bg-transparent;
   }
   ::-webkit-scrollbar-thumb {
-    @apply bg-slate-300 rounded-full hover:bg-slate-400 transition-colors;
+    @apply bg-slate-400 rounded-full hover:bg-slate-500;
   }
 }
 
 @layer components {
   .glass-card {
-    @apply bg-white/70 backdrop-blur-xl border border-white/20 shadow-lg;
+    @apply bg-white/95 border border-white/20 shadow-lg;
   }
   
   .glass-sidebar {
@@ -110,16 +110,21 @@
   @apply bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-rose-500 font-black;
 }
 
+/* Fix scroll issues on Windows/Electron */
+* {
+  -webkit-overflow-scrolling: touch;
+}
+
 .custom-scrollbar::-webkit-scrollbar {
-  width: 5px;
+  width: 8px;
 }
 .custom-scrollbar::-webkit-scrollbar-track {
   background: transparent;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(0,0,0,0.05);
+  background: rgba(0,0,0,0.15);
   border-radius: 10px;
 }
 .custom-scrollbar:hover::-webkit-scrollbar-thumb {
-  background: rgba(0,0,0,0.1);
+  background: rgba(0,0,0,0.25);
 }
